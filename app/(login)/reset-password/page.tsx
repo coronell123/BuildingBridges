@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useFormState } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,9 +16,8 @@ interface ResetPasswordState {
 }
 
 export default function ResetPasswordPage() {
-  const [formState, formAction, isPending] = useFormState<ActionState<ResetPasswordState>>(
+  const [formState, formAction] = useFormState<ActionState<ResetPasswordState>>(
     async (currentState, formData: FormData) => {
-      // Call the resetPassword function and handle errors or success
       try {
         return await resetPassword(formData);
       } catch (err: any) {
@@ -31,6 +31,7 @@ export default function ResetPasswordPage() {
   );
 
   const [step, setStep] = useState<'request' | 'reset'>('request');
+  const [isPending, startTransition] = useState(false);
 
   return (
     <Card className="w-full max-w-md mx-auto mt-8">
@@ -39,13 +40,17 @@ export default function ResetPasswordPage() {
       </CardHeader>
       <CardContent>
         <form
-          action={formAction}
+          action={(formData) => {
+            startTransition(true);
+            formAction(formData);
+          }}
           className="space-y-4"
           onSubmit={(e) => {
-            e.preventDefault();
             if (formState.success) {
+              e.preventDefault();
               setStep('reset');
             }
+            startTransition(false);
           }}
         >
           {step === 'request' ? (

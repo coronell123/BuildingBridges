@@ -12,10 +12,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUser } from '@/lib/auth';
+import { useUser } from '@/lib/auth/index';
 import { signOut } from '@/app/(login)/actions';
 import { useRouter } from 'next/navigation';
-
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, setUser } = useUser();
@@ -209,3 +208,4 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     </section>
   );
 }
+

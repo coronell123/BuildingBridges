@@ -6,7 +6,7 @@ const WINDOW_SIZE = 60 * 1000; // 1 minute
 const MAX_REQUESTS = 100;
 
 export function rateLimitMiddleware(request: NextRequest) {
-  const ip = request.ip ?? 'anonymous';
+  const ip = request.headers.get('x-forwarded-for') ?? 'anonymous';
   const now = Date.now();
   const windowData = rateLimit.get(ip);
 

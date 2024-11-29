@@ -422,10 +422,36 @@ export const inviteTeamMember = validatedActionWithUser(
 );
 
 export async function resetPassword(formData: FormData) {
-  // Implement your password reset logic here
-  // Return appropriate success/error messages
-  return {
-    error: '',
-    success: 'Password reset email sent'
-  };
+  const email = formData.get('email') as string;
+  const token = formData.get('token') as string;
+  const newPassword = formData.get('newPassword') as string;
+
+  try {
+    if (!token && email) {
+      // Step 1: Send reset password email
+      // Implement your email sending logic here
+      return {
+        error: '',
+        success: 'If an account exists with this email, you will receive a password reset link.'
+      };
+    } else if (token && newPassword) {
+      // Step 2: Reset password with token
+      // Implement your password reset logic here
+      // Verify token and update password in database
+      return {
+        error: '',
+        success: 'Password has been reset successfully. You can now login with your new password.'
+      };
+    }
+
+    return {
+      error: 'Invalid request',
+      success: ''
+    };
+  } catch (error) {
+    return {
+      error: 'Failed to reset password. Please try again.',
+      success: ''
+    };
+  }
 }
