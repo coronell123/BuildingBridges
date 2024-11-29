@@ -198,7 +198,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     return createCheckoutSession({ team: createdTeam, priceId });
   }
 
-  redirect('/dashboard');
+  redirect('/onboarding');
 });
 
 export async function signOut() {
@@ -420,3 +420,12 @@ export const inviteTeamMember = validatedActionWithUser(
     return { success: 'Invitation sent successfully' };
   }
 );
+
+export async function resetPassword(formData: FormData) {
+  // Implement your password reset logic here
+  // Return appropriate success/error messages
+  return {
+    error: '',
+    success: 'Password reset email sent'
+  };
+}

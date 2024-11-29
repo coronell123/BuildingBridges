@@ -83,12 +83,6 @@ function Header() {
             >
               <Link href="/roadmap">Roadmap</Link>
             </Button>
-            <Button
-              asChild
-              className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full px-6 py-2 transition-all duration-300 hover:scale-105 hover:shadow-lg"
-            >
-              <Link href="/pricing">Pricing</Link>
-            </Button>
           </div>
 
           {/* User Controls */}

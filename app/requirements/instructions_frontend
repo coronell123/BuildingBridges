@@ -1,0 +1,179 @@
+# project Overview
+Building Bridges Website is a modern, responsive platform designed to empower FLINTA individuals and girls of color aged 16–18. This project is built with Next.js, styled with TailwindCSS, and deployed using Vercel. It provides tools, resources, and a supportive community to encourage participation, achievement, and resilience among underrepresented groups in psychosocial and educational fields.
+
+Frontend: Next.js (React framework)
+Styling: TailwindCSS
+State Management: React Context API
+Validation & Utilities: Zod
+Icons & Components: Lucide-React, Tailwind Aria Components
+Deployment: Vercel (CI/CD enabled)
+Package Manager: PNPM
+
+#Feature Requirements
+1. Navigation Bar (Navbar)
+
+	•	Logo:
+	•	Ensure the logo has a transparent background or blends better with the website’s background.
+	•	Make the logo responsive (adjust size dynamically for different screen sizes).
+	•	Links:
+	•	Center all links horizontally in the navbar.
+	•	Remove the “Pricing” link.
+	•	Populate navbar links with appropriate pages (e.g., Home, Vision, Workshops, Activity, Roadmap).
+	•	Sign In/Sign Up:
+	•	Retain the “Sign In” and “Sign Up” links.
+	•	Ensure responsive behavior for smaller screen sizes:
+	•	Collapse navbar into a hamburger menu for mobile users.
+	•	Implement a dropdown menu for collapsed links.
+    2. Hero Section (Landing Page)
+
+	•	Replace the background image with a more relevant or high-quality image (optional for now).
+	•	Ensure call-to-action buttons (“ZytaBuy” and “Jetzt Anmelden”):
+	•	Redirect to the Sign Up or Sign In page appropriately.
+	•	Make the hero section fully responsive for all screen sizes.
+    3. Footer
+
+	•	Populate footer links with actual content (e.g., About, Contact, Terms of Service, Privacy Policy).
+	•	Ensure proper alignment and responsiveness.
+    4. Vision Page
+
+	•	Create an interactive page to explain the vision of the platform.
+	•	Include clickable elements and sections to make the content engaging.
+	•	Use animations or transitions to enhance user experience.
+	•	Add content highlighting the purpose and brand vision of Building Bridges.
+    5. Workshops Page
+
+	•	Create a dynamic grid layout with placeholder cells for future workshops.
+	•	On clicking a workshop, open a pop-up/modal containing:
+	•	Title and description of the workshop.
+	•	Date, time, and location (or online details).
+	•	A button to register for the workshop.
+	•	Add responsiveness to the workshop grid for mobile devices.
+    6. Activity Page
+
+	•	Add a timeline view to showcase the project’s current progress.
+	•	Make the timeline visually appealing and interactive for users.
+    7. Roadmap Page
+
+	•	Create a roadmap with:
+	•	Current milestones achieved by the platform.
+	•	Upcoming features or events.
+	•	Visual markers for “Completed,” “In Progress,” and “Planned” stages.
+	•	Allow users to click on roadmap items for more details.
+    8. Onboarding Process (Sign-Up Page)
+
+	•	Implement a step-by-step onboarding flow for new users:
+	•	Gather user details, including challenges faced (e.g., discrimination, racism) and expectations from the platform.
+	•	Use an interactive tree-building experience:
+	•	Users “grow” their own tree by selecting options that align with their personal circumstances and goals.
+	•	Redirect users based on their responses:
+	•	Suggest specific workshops or other resources.
+	•	Display tailored offerings if no direct match is available.
+	•	Save onboarding information to a database.
+	•	Connect onboarding data to a webhook for further processing and hyper-personalization.
+9. Mobile Responsiveness
+
+	•	Ensure the entire website is fully responsive:
+	•	Navbar transitions to a hamburger menu with a dropdown for mobile users.
+	•	Dynamic resizing of elements like the logo and hero section.
+	•	All pages and components adjust seamlessly for smaller screen sizes.
+10. Backend Integration
+
+	•	Save user-generated data (e.g., onboarding responses) into a database.
+	•	Enable webhook connectivity to trigger personalized workflows or automated recommendations.
+Additional Notes
+
+	•	Hyper-personalization: Plan for automated workflows triggered by user data from onboarding.
+	•	Future Backend Features: Extend functionality with tailored resources and analytics based on collected data.
+	•	Accessibility: Ensure the platform is inclusive and accessible (e.g., ARIA roles, readable font sizes, contrasting colors).
+
+# current file structure
+.
+├── .next
+├── .vercel
+├── app
+│   ├── (dashboard)
+│   │   ├── dashboard
+│   │   │   ├── activity
+│   │   │   │   └── page.tsx
+│   │   │   ├── general
+│   │   │   │   └── page.tsx
+│   │   │   ├── security
+│   │   │   │   └── page.tsx
+│   │   │   ├── invite-team.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx
+│   │   │   └── settings.tsx
+│   │   ├── pricing
+│   │   │   ├── layout.tsx
+│   │   │   └── page.tsx
+│   │   └── terminal.tsx
+│   ├── (login)
+│   │   ├── sign-in
+│   │   │   └── page.tsx
+│   │   ├── sign-up
+│   │   │   └── page.tsx
+│   │   ├── actions.ts
+│   │   └── login.tsx
+│   ├── globals.css
+│   ├── layout.tsx
+│   ├── not-found.tsx
+│   └── page.tsx
+├── api
+│   ├── stripe
+│   │   ├── checkout
+│   │   │   └── route.ts
+│   │   └── webhook
+│   │       └── route.ts
+├── lib
+│   ├── auth
+│   │   └── session.ts
+│   ├── db
+│   │   ├── migrations
+│   │   │   ├── 0000_soft_the_anarchist.sql
+│   │   │   └── meta
+│   │   │       ├── 0000_snapshot.json
+│   │   │       └── _journal.json
+│   │   ├── drizzle.ts
+│   │   ├── migrate.ts
+│   │   ├── schema.ts
+│   │   ├── seed.ts
+│   │   └── setup.ts
+│   ├── payments
+│   │   └── stripe.ts
+│   └── utils.ts
+├── components
+│   ├── ui
+│   │   ├── avatar.tsx
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   ├── dropdown-menu.tsx
+│   │   ├── input.tsx
+│   │   ├── label.tsx
+│   │   └── radio-group.tsx
+│   ├── layout
+│   │   ├── footer.tsx
+│   │   ├── header.tsx
+│   │   └── navbar.tsx
+│   └── shared
+│       └── loading.tsx
+├── public
+│   ├── favicon.ico
+│   ├── logo.png
+│   └── logo_graphic_wide2.png
+├── styles
+│   └── globals.css
+├── .env
+├── .env.example
+├── .gitignore
+├── components.json
+├── drizzle.config.ts
+├── LICENSE
+├── middleware.ts
+├── next-env.d.ts
+├── next.config.js
+├── package.json
+├── pnpm-lock.yaml
+├── postcss.config.mjs
+├── README.md
+├── tailwind.config.ts
+└── tsconfig.json

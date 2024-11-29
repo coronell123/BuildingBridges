@@ -69,9 +69,6 @@ export default function NotFound() {
               <Link href="/roadmap" className="text-sm font-medium text-black hover:text-gray-600">
                 Roadmap
               </Link>
-              <Link href="/pricing" className="text-sm font-medium text-black hover:text-gray-600">
-                Pricing
-              </Link>
             </div>
 
             <div className="flex items-center gap-4">
