@@ -1,6 +1,9 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Users2, BookOpen, Brain, Heart, Star } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function HomePage() {
   return (
@@ -17,9 +20,11 @@ export default function HomePage() {
                 Mädchen & FLINTA of Color zu mehr Teilhabe, Erfüllung und Kraft empowern
               </p>
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-                <Button className="bg-white hover:bg-gray-100 text-black border border-gray-200 rounded-full text-lg px-8 py-4 inline-flex items-center justify-center">
-                  Sei dabei!
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                <Button asChild className="bg-white hover:bg-gray-100 text-black border border-gray-200 rounded-full text-lg px-8 py-4 inline-flex items-center justify-center">
+                  <Link href="/sign-up">
+                    Sei dabei!
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -123,9 +128,11 @@ export default function HomePage() {
               </div>
             </div>
             <div className="mt-8 lg:mt-0 flex justify-center lg:justify-end">
-              <Button className="bg-white hover:bg-gray-100 text-black border border-gray-200 rounded-full text-xl px-12 py-6 inline-flex items-center justify-center">
-                Jetzt anmelden
-                <ArrowRight className="ml-3 h-6 w-6" />
+              <Button asChild className="bg-white hover:bg-gray-100 text-black border border-gray-200 rounded-full text-xl px-12 py-6 inline-flex items-center justify-center">
+                <Link href="/sign-up">
+                  Jetzt anmelden
+                  <ArrowRight className="ml-3 h-6 w-6" />
+                </Link>
               </Button>
             </div>
           </div>

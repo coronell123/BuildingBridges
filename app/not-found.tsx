@@ -2,123 +2,26 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { CircleIcon } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
-import { Home, LogOut, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUser } from '@/lib/auth/index';
-import { signOut } from '@/app/(login)/actions';
-import { useRouter } from 'next/navigation';
+import { Navbar } from '@/components/layout/navbar';
 
 export default function NotFound() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, setUser } = useUser();
-  const router = useRouter();
-
-  async function handleSignOut() {
-    setUser(null);
-    await signOut();
-    router.push('/');
-  }
-
   return (
-    <div className="flex flex-col min-h-[100dvh]">
-      <header className="relative h-[40vh] min-h-[320px] w-full">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/logo_graphic_wide2.png"
-            alt="Background Graphic"
-            fill
-            className="object-cover w-full"
-          />
-        </div>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
 
-        <nav className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-4">
-          <div className="h-full flex justify-between items-center">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="relative h-[100px] w-[100px] sm:h-[120px] sm:w-[120px]">
-                <Image
-                  src="/logo.png"
-                  alt="Building Bridges Logo"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white text-center sm:text-left mt-4 sm:mt-0 sm:ml-6">
-                Building Bridges
-              </h1>
-            </Link>
-
-            <div className="flex items-center space-x-6 -ml-20">
-              <Link href="/vision" className="text-sm font-medium text-black hover:text-gray-600">
-                Vision
-              </Link>
-              <Link href="/workshops" className="text-sm font-medium text-black hover:text-gray-600">
-                Workshops
-              </Link>
-              <Link href="/activity" className="text-sm font-medium text-black hover:text-gray-600">
-                Activity
-              </Link>
-              <Link href="/roadmap" className="text-sm font-medium text-black hover:text-gray-600">
-                Roadmap
-              </Link>
-            </div>
-
-            <div className="flex items-center gap-4">
-              {user ? (
-                <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-                  <DropdownMenuTrigger asChild>
-                    <Avatar className="cursor-pointer h-12 w-12 ring-2 ring-white/50">
-                      <AvatarImage alt={user.name || ''} />
-                      <AvatarFallback>
-                        {user.email
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="flex flex-col gap-1">
-                    <DropdownMenuItem className="cursor-pointer">
-                      <Link href="/dashboard" className="flex w-full items-center">
-                        <Home className="mr-2 h-4 w-4" />
-                        <span>Dashboard</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <form action={handleSignOut} className="w-full">
-                      <button type="submit" className="flex w-full">
-                        <DropdownMenuItem className="w-full flex-1 cursor-pointer">
-                          <LogOut className="mr-2 h-4 w-4" />
-                          <span>Sign out</span>
-                        </DropdownMenuItem>
-                      </button>
-                    </form>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Button
-                  asChild
-                  className="bg-white hover:bg-gray-100 text-black text-sm px-4 py-2 rounded-full"
-                >
-                  <Link href="/sign-up">Sign Up</Link>
-                </Button>
-              )}
-            </div>
-          </div>
-        </nav>
-      </header>
-
-      <div className="flex-1 flex items-center justify-center">
+      {/* Main content */}
+      <div className="flex-1 flex items-center justify-center mt-16">
         <div className="max-w-md space-y-8 p-4 text-center">
           <div className="flex justify-center">
-            <CircleIcon className="size-12 text-orange-500" />
+            <Image
+              src="/logo_round.svg"
+              alt="Building Bridges Logo"
+              width={80}
+              height={80}
+              className="w-auto h-20"
+            />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
             Page Not Found
@@ -127,17 +30,19 @@ export default function NotFound() {
             The page you are looking for might have been removed, had its name
             changed, or is temporarily unavailable.
           </p>
-          <Link
-            href="/"
-            className="max-w-48 mx-auto flex justify-center py-2 px-4 border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+          <Button
+            asChild
+            className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
           >
-            Back to Home
-          </Link>
+            <Link href="/">Back to Home</Link>
+          </Button>
         </div>
       </div>
 
-      <footer className="bg-gray-50 border-t">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Footer section */}
+      <footer className="relative bg-gray-50 border-t">
+        <div className="absolute inset-0 bg-[url('/abstract.svg')] bg-center bg-no-repeat bg-cover opacity-10" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
               <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Company</h3>
