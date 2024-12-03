@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Settings, Plus, Trash, Edit, Eye } from 'lucide-react';
-import { ActivityType } from '../types';
+import { ActivityType } from '@/lib/db/schema';
 
 export const iconMap = {
   CREATE: Plus,
@@ -10,9 +10,11 @@ export const iconMap = {
   VIEW: Eye,
   DEFAULT: Settings,
 } as const;
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
 export function formatAction(action: ActivityType): string {
   return action
     .split('_')
