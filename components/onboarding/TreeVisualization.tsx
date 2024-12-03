@@ -18,11 +18,13 @@ export function TreeVisualization({ data, onNodeClick }: TreeVisualizationProps)
   const renderNode = (node: TreeNode, level: number = 0) => {
     return (
       <motion.div
-        key={node.id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: level * 0.2 }}
-        className={`relative ${level > 0 ? 'ml-8 mt-4' : ''}`}
+        {...({
+          key: node.id,
+          className: `relative ${level > 0 ? 'ml-8 mt-4' : ''}`,
+          initial: { opacity: 0, y: 20 },
+          animate: { opacity: 1, y: 0 },
+          transition: { delay: level * 0.2 },
+        } as HTMLMotionProps<'div'>)}
       >
         <button
           onClick={() => onNodeClick(node.id)}

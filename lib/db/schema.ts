@@ -5,6 +5,7 @@ import {
   text,
   timestamp,
   integer,
+  uuid,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -68,10 +69,21 @@ export const invitations = pgTable('invitations', {
   status: varchar('status', { length: 20 }).notNull().default('pending'),
 });
 
+export const onboardingData = pgTable('onboarding_data', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  challenges: text('challenges').notNull(),
+  goals: text('goals').notNull(),
+  interests: text('interests').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 export const teamsRelations = relations(teams, ({ many }) => ({
-  teamMembers: many(teamMembers),
-  activityLogs: many(activityLogs),
-  invitations: many(invitations),
+  teamMembers: many(() => teamMembers),
+  activityLogs: many(() => activityLogs),
+  invitations: many(() => invitations),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({

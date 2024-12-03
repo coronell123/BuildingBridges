@@ -1,37 +1,41 @@
 'use client';
 
 import { useState } from 'react';
-import { useFormState } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { resetPassword } from '@/app/(login)/actions';
-import Link from 'next/link';
-import { ActionState } from '@/lib/auth/middleware';
 
-interface ResetPasswordState {
+type ResetPasswordState = {
   error: string;
   success: string;
-}
+};
 
 export default function ResetPasswordPage() {
-  const [formState, formAction] = useFormState<ActionState<ResetPasswordState>>(
-    async (currentState, formData: FormData) => {
-      try {
-        return await resetPassword(formData);
-      } catch (err: any) {
-        return { error: err.message || 'An error occurred', success: '' };
-      }
-    },
-    {
-      error: '',
-      success: '',
-    }
-  );
-
   const [step, setStep] = useState<'request' | 'reset'>('request');
-  const [isPending, startTransition] = useState(false);
+  const [formState, setFormState] = useState<ResetPasswordState>({
+    error: '',
+    success: '',
+  });
+  const [isPending, setIsPending] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsPending(true);
+    const formData = new FormData(e.currentTarget);
+
+    // Call the resetPassword function
+    const result = await resetPassword(formData);
+    setFormState(result);
+
+    // Handle success or transition between steps
+    if (result.success && step === 'request') {
+      setStep('reset'); // Transition to "reset password" step
+    }
+
+    setIsPending(false);
+  };
 
   return (
     <Card className="w-full max-w-md mx-auto mt-8">
@@ -39,20 +43,7 @@ export default function ResetPasswordPage() {
         <CardTitle>Reset Password</CardTitle>
       </CardHeader>
       <CardContent>
-        <form
-          action={(formData) => {
-            startTransition(true);
-            formAction(formData);
-          }}
-          className="space-y-4"
-          onSubmit={(e) => {
-            if (formState.success) {
-              e.preventDefault();
-              setStep('reset');
-            }
-            startTransition(false);
-          }}
-        >
+        <form onSubmit={handleSubmit} className="space-y-4">
           {step === 'request' ? (
             <div>
               <Label htmlFor="email">Email</Label>
