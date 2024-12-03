@@ -2,137 +2,114 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Home, LogOut, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUser } from '@/lib/auth/index';
-import { signOut } from '@/app/(login)/actions';
-import { useRouter } from 'next/navigation';
-function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, setUser } = useUser();
-  const router = useRouter();
+import { useState } from 'react';
+import { Menu, X, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 
-  async function handleSignOut() {
-    setUser(null);
-    await signOut();
-    router.push('/');
-  }
+const navItems = [
+  { name: 'Vision', href: '/vision' },
+  { name: 'Workshops', href: '/workshops' },
+  { name: 'Activity', href: '/activity' },
+  { name: 'Roadmap', href: '/roadmap' },
+];
+
+function Header() {
+  const { user } = useUser();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="relative h-[40vh] min-h-[320px] w-full">
-      {/* Abstract Shape Background */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/logo_graphic_wide2.png"
-          alt="Background Graphic"
-          fill
-          className="object-cover w-full"
-        />
-      </div>
-
-      <nav className="relative z-10 w-full px-4 sm:px-6 lg:px-8 py-4">
-        {/* Logo and Title Section */}
-        <div className="h-full flex justify-between items-center">
-          {/* Logo Section */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="relative h-[100px] w-[100px] sm:h-[120px] sm:w-[120px]">
-              <Image
-                src="/logo.png"
-                alt="Building Bridges Logo"
-                fill
-                className="object-contain"
-              />
+    <header className="fixed top-0 left-0 right-0 z-50">
+      <div className="absolute inset-0 bg-[url('/abstract.svg')] bg-center bg-no-repeat bg-cover opacity-50" />
+      <nav className="relative bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            {/* Logo - always visible */}
+            <div className="flex-shrink-0 flex items-center">
+              <Link href="/" className="flex items-center space-x-2">
+                <Image
+                  src="/logo.png"
+                  alt="Building Bridges Logo"
+                  width={40}
+                  height={40}
+                  className="w-auto h-8"
+                />
+                <span className="text-xl font-bold">Building Bridges</span>
+              </Link>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white text-center sm:text-left mt-4 sm:mt-0 sm:ml-6">
-              Building Bridges
-            </h1>
-          </Link>
 
-          {/* Navigation Links */}
-          <div className="flex items-center space-x-6">
-            <Button
-              asChild
-              className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full px-6 py-2 transition-all duration-300 hover:scale-105 hover:shadow-lg"
-            >
-              <Link href="/vision">Vision</Link>
-            </Button>
-            <Button
-              asChild
-              className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full px-6 py-2 transition-all duration-300 hover:scale-105 hover:shadow-lg"
-            >
-              <Link href="/workshops">Workshops</Link>
-            </Button>
-            <Button
-              asChild
-              className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full px-6 py-2 transition-all duration-300 hover:scale-105 hover:shadow-lg"
-            >
-              <Link href="/activity">Activity</Link>
-            </Button>
-            <Button
-              asChild
-              className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full px-6 py-2 transition-all duration-300 hover:scale-105 hover:shadow-lg"
-            >
-              <Link href="/roadmap">Roadmap</Link>
-            </Button>
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-6">
+              {navItems.map((item) => (
+                <Button
+                  key={item.name}
+                  asChild
+                  className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full px-6 py-2 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                >
+                  <Link href={item.href}>{item.name}</Link>
+                </Button>
+              ))}
+            </div>
+
+            {/* Auth Buttons - always visible */}
+            <div className="flex items-center space-x-4">
+              {user ? (
+                <Button
+                  asChild
+                  className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                >
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <Button
+                    asChild
+                    className="bg-white hover:bg-gray-100 text-black text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105"
+                  >
+                    <Link href="/sign-in">Sign In</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    className="bg-gradient-to-b from-[#8c52ff] to-black text-white text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                  >
+                    <Link href="/sign-up">Sign Up</Link>
+                  </Button>
+                </div>
+              )}
+
+              {/* Mobile menu button */}
+              <button
+                type="button"
+                className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                <span className="sr-only">Open main menu</span>
+                {isMenuOpen ? (
+                  <X className="block h-6 w-6" />
+                ) : (
+                  <Menu className="block h-6 w-6" />
+                )}
+              </button>
+            </div>
           </div>
 
-          {/* User Controls */}
-          <div className="flex items-center gap-4">
-            {user ? (
-              <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-                <DropdownMenuTrigger asChild>
-                  <Avatar className="cursor-pointer h-12 w-12 ring-2 ring-white/50">
-                    <AvatarImage alt={user.name || ''} />
-                    <AvatarFallback>
-                      {user.email
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="flex flex-col gap-1">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Link href="/dashboard" className="flex w-full items-center">
-                      <Home className="mr-2 h-4 w-4" />
-                      <span>Dashboard</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <form action={handleSignOut} className="w-full">
-                    <button type="submit" className="flex w-full">
-                      <DropdownMenuItem className="w-full flex-1 cursor-pointer">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Sign out</span>
-                      </DropdownMenuItem>
-                    </button>
-                  </form>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <div className="flex items-center gap-4">
-                <Button
-                  asChild
-                  className="bg-white hover:bg-gray-100 text-black text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105"
-                >
-                  <Link href="/sign-in">Sign In</Link>
-                </Button>
-                <Button
-                  asChild
-                  className="bg-gradient-to-b from-[#8c52ff] to-black text-white text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                >
-                  <Link href="/sign-up">Sign Up</Link>
-                </Button>
+          {/* Mobile Navigation */}
+          {isMenuOpen && (
+            <div className="md:hidden bg-white border-t border-gray-200">
+              <div className="px-2 pt-2 pb-3 space-y-1">
+                {navItems.map((item) => (
+                  <Button
+                    key={item.name}
+                    asChild
+                    className="w-full bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full px-6 py-2 transition-all duration-300 hover:scale-105 hover:shadow-lg mb-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Link href={item.href}>{item.name}</Link>
+                  </Button>
+                ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </nav>
     </header>
@@ -141,8 +118,9 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="bg-gray-50 border-t">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="relative bg-gray-50 border-t">
+      <div className="absolute inset-0 bg-[url('/abstract.svg')] bg-center bg-no-repeat bg-cover opacity-10" />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Company</h3>
@@ -199,13 +177,16 @@ function Footer() {
   );
 }
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <section className="flex flex-col min-h-[100dvh] w-full">
+    <div className="min-h-screen flex flex-col">
       <Header />
-      {children}
+      <div className="flex-1 mt-16">{children}</div>
       <Footer />
-    </section>
+    </div>
   );
 }
-
