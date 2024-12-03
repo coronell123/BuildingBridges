@@ -3,10 +3,12 @@ import type { Metadata, Viewport } from 'next';
 import { Manrope } from 'next/font/google';
 import { UserProvider } from '@/lib/auth/index';
 import { getUser } from '@/lib/db/queries';
+import { Navbar } from '@/components/layout/navbar';
+import { Footer } from '@/components/layout/footer';
 
 export const metadata: Metadata = {
-  title: 'Next.js SaaS Starter',
-  description: 'Get started quickly with Next.js, Postgres, and Stripe.',
+  title: 'Building Bridges',
+  description: 'Empowerment und Mentoring für Mädchen & FLINTA of Color',
 };
 
 export const viewport: Viewport = {
@@ -28,7 +30,13 @@ export default function RootLayout({
       className={`bg-white dark:bg-gray-950 text-black dark:text-white ${manrope.className}`}
     >
       <body className="min-h-[100dvh] bg-gray-50">
-        <UserProvider userPromise={userPromise}>{children}</UserProvider>
+        <UserProvider userPromise={userPromise}>
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-1 mt-16">{children}</main>
+            <Footer />
+          </div>
+        </UserProvider>
       </body>
     </html>
   );
