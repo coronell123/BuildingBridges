@@ -11,12 +11,11 @@ const Dialog = DialogPrimitive.Root
 const DialogTrigger = DialogPrimitive.Trigger
 
 const DialogPortal = ({
-  className,
   children,
   ...props
 }: DialogPrimitive.DialogPortalProps) => (
-  <DialogPrimitive.Portal className={cn(className)} {...props}>
-    <div className="fixed inset-0 z-50 flex items-start justify-center sm:items-center">
+  <DialogPrimitive.Portal {...props}>
+    <div className={cn("fixed inset-0 z-50 flex items-start justify-center sm:items-center")}>
       {children}
     </div>
   </DialogPrimitive.Portal>
@@ -117,6 +116,8 @@ const DialogDescription = React.forwardRef<
 ))
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
+const DialogClose = DialogPrimitive.Close
+
 export {
   Dialog,
   DialogTrigger,
@@ -125,4 +126,5 @@ export {
   DialogFooter,
   DialogTitle,
   DialogDescription,
+  DialogClose,
 }

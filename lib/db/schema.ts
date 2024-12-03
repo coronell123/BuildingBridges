@@ -81,9 +81,9 @@ export const onboardingData = pgTable('onboarding_data', {
 });
 
 export const teamsRelations = relations(teams, ({ many }) => ({
-  teamMembers: many(() => teamMembers),
-  activityLogs: many(() => activityLogs),
-  invitations: many(() => invitations),
+  teamMembers: many(teamMembers),
+  activityLogs: many(activityLogs),
+  invitations: many(invitations),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -134,10 +134,28 @@ export type ActivityLog = typeof activityLogs.$inferSelect;
 export type NewActivityLog = typeof activityLogs.$inferInsert;
 export type Invitation = typeof invitations.$inferSelect;
 export type NewInvitation = typeof invitations.$inferInsert;
-export type TeamDataWithMembers = Team & {
-  teamMembers: (TeamMember & {
-    user: Pick<User, 'id' | 'name' | 'email'>;
-  })[];
+export type TeamDataWithMembers = {
+  id: number;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+  stripeProductId: string | null;
+  planName: string | null;
+  subscriptionStatus: string | null;
+  teamMembers: {
+    id: number;
+    role: string;
+    userId: number;
+    teamId: number;
+    joinedAt: Date;
+    user: {
+      id: number;
+      name: string | null;
+      email: string;
+    };
+  }[];
 };
 
 export enum ActivityType {

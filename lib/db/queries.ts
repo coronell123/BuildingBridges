@@ -100,30 +100,47 @@ export async function getActivityLogs() {
 }
 
 export async function getTeamForUser(userId: number) {
-  const result = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-    with: {
-      teamMembers: {
-        with: {
-          team: {
-            with: {
-              teamMembers: {
-                with: {
-                  user: {
-                    columns: {
-                      id: true,
-                      name: true,
-                      email: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
+  const result = await db
+    .select({
+      id: teams.id,
+      name: teams.name,
+      createdAt: teams.createdAt,
+      updatedAt: teams.updatedAt,
+      stripeCustomerId: teams.stripeCustomerId,
+      stripeSubscriptionId: teams.stripeSubscriptionId,
+      stripeProductId: teams.stripeProductId,
+      planName: teams.planName,
+      subscriptionStatus: teams.subscriptionStatus,
+      teamMembers: teamMembers,
+    })
+    .from(teams)
+    .innerJoin(teamMembers, eq(teams.id, teamMembers.teamId))
+    .innerJoin(users, eq(teamMembers.userId, users.id))
+    .where(eq(teamMembers.userId, userId))
+    .execute();
 
-  return result?.teamMembers[0]?.team || null;
+  if (!result.length) return null;
+
+  const team = result[0];
+  const membersWithUsers = await db
+    .select({
+      id: teamMembers.id,
+      role: teamMembers.role,
+      userId: teamMembers.userId,
+      teamId: teamMembers.teamId,
+      joinedAt: teamMembers.joinedAt,
+      user: {
+        id: users.id,
+        name: users.name,
+        email: users.email,
+      },
+    })
+    .from(teamMembers)
+    .innerJoin(users, eq(teamMembers.userId, users.id))
+    .where(eq(teamMembers.teamId, team.id));
+
+  return {
+    ...team,
+    teamMembers: membersWithUsers,
+  };
 }

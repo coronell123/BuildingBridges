@@ -14,7 +14,11 @@ type ActionState = {
   success?: string;
 };
 
-export function Settings({ teamData }: { teamData: TeamDataWithMembers }) {
+type SettingsProps = {
+  teamData: TeamDataWithMembers;
+};
+
+export function Settings({ teamData }: SettingsProps) {
   const [removeState, removeAction, isRemovePending] = useActionState<
     ActionState,
     FormData
