@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { saveOnboardingData } from '@/lib/actions';
+import { useRouter } from 'next/navigation';
 
 interface OnboardingStep {
   id: string;
@@ -53,14 +54,22 @@ const onboardingSteps: OnboardingStep[] = [
 ];
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleNext = async () => {
     if (currentStep === onboardingSteps.length - 1) {
-      // Save answers to database and redirect
-      await saveOnboardingData(answers);
-      window.location.href = '/dashboard';
+      try {
+        setIsSubmitting(true);
+        await saveOnboardingData(answers);
+        router.push('/dashboard');
+      } catch (error) {
+        console.error('Error saving onboarding data:', error);
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       setCurrentStep(prev => prev + 1);
     }
