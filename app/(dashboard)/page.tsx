@@ -1,9 +1,24 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { ArrowRight, Users2, BookOpen, Brain, Heart, Star } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
+import Image from 'next/image';
+import { ArrowRight, Heart, Star, Users2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+
+const fadeIn = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 }
+};
+
+const staggerChildren = {
+  animate: {
+    transition: {
+      staggerChildren: 0.2
+    }
+  }
+};
 
 export default function HomePage() {
   return (
@@ -11,38 +26,75 @@ export default function HomePage() {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-            <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
+            <motion.div 
+              className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
               <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
                 Building Bridges
-                <span className="block text-[#8c52ff]">Empowerment und Mentoring für Mädchen & FLINTA of Color</span>
+                <motion.span 
+                  className="block text-[#8c52ff]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.6 }}
+                >
+                  Empowerment und Mentoring für Mädchen & FLINTA of Color
+                </motion.span>
               </h1>
-              <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
+              <motion.p 
+                className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.6 }}
+              >
                 Mädchen & FLINTA of Color zu mehr Teilhabe, Erfüllung und Kraft empowern
-              </p>
-              <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-                <Button asChild className="bg-white hover:bg-gray-100 text-black border border-gray-200 rounded-full text-lg px-8 py-4 inline-flex items-center justify-center">
+              </motion.p>
+              <motion.div 
+                className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.6 }}
+              >
+                <Button 
+                  asChild 
+                  className="bg-white hover:bg-gray-100 text-black border border-gray-200 rounded-full text-lg px-8 py-4 inline-flex items-center justify-center hover:scale-105 transition-transform duration-300"
+                >
                   <Link href="/sign-up">
                     Sei dabei!
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-              </div>
-            </div>
-            <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
+              </motion.div>
+            </motion.div>
+
+            <motion.div 
+              className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
               <Image
                 src="/coverImage_Building_Bridges.png"
                 alt="Building Bridges Illustration"
                 width={500}
                 height={400}
-                className="object-contain rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300"
+                className="object-contain rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300"
                 priority
               />
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      <section className="py-16 bg-white w-full">
+      <motion.section 
+        className="py-16 bg-white w-full"
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true }}
+        variants={staggerChildren}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Unsere Vision</h2>
           <p className="text-lg text-gray-600 max-w-4xl mx-auto text-center mb-16">
@@ -99,9 +151,15 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="py-16 bg-gray-50">
+      <motion.section 
+        className="py-16 bg-gray-50"
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true }}
+        variants={staggerChildren}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
             <div>
@@ -137,7 +195,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
     </main>
   );
 }

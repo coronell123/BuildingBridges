@@ -1,1 +1,1 @@
- 
+export type ActivityType = 'CREATE' | 'DELETE' | 'UPDATE' | 'VIEW' | 'DEFAULT'; 
