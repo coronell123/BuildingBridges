@@ -11,20 +11,22 @@ import {
   CheckCircle,
   type LucideIcon,
 } from 'lucide-react';
-import { ActivityType } from '@/lib/db/schema';
-import { getActivityLogs } from '@/lib/db/queries';
+import { auth } from '@clerk/nextjs/server';
+import { db } from '@/lib/db/drizzle';
+import { activityLogs, teamMembers, users } from '@/lib/db/schema';
+import { desc, eq, and } from 'drizzle-orm';
 
-const iconMap: Record<ActivityType, LucideIcon> = {
-  [ActivityType.SIGN_UP]: UserPlus,
-  [ActivityType.SIGN_IN]: UserCog,
-  [ActivityType.SIGN_OUT]: LogOut,
-  [ActivityType.UPDATE_PASSWORD]: Lock,
-  [ActivityType.DELETE_ACCOUNT]: UserMinus,
-  [ActivityType.UPDATE_ACCOUNT]: Settings,
-  [ActivityType.CREATE_TEAM]: UserPlus,
-  [ActivityType.REMOVE_TEAM_MEMBER]: UserMinus,
-  [ActivityType.INVITE_TEAM_MEMBER]: Mail,
-  [ActivityType.ACCEPT_INVITATION]: CheckCircle,
+const iconMap: Record<string, LucideIcon> = {
+  'SIGN_UP': UserPlus,
+  'SIGN_IN': UserCog,
+  'SIGN_OUT': LogOut,
+  'UPDATE_PASSWORD': Lock,
+  'DELETE_ACCOUNT': UserMinus,
+  'UPDATE_ACCOUNT': Settings,
+  'CREATE_TEAM': UserPlus,
+  'REMOVE_TEAM_MEMBER': UserMinus,
+  'INVITE_TEAM_MEMBER': Mail,
+  'ACCEPT_INVITATION': CheckCircle,
 };
 
 function getRelativeTime(date: Date) {
@@ -41,27 +43,27 @@ function getRelativeTime(date: Date) {
   return date.toLocaleDateString();
 }
 
-function formatAction(action: ActivityType): string {
+function formatAction(action: string): string {
   switch (action) {
-    case ActivityType.SIGN_UP:
+    case 'SIGN_UP':
       return 'You signed up';
-    case ActivityType.SIGN_IN:
+    case 'SIGN_IN':
       return 'You signed in';
-    case ActivityType.SIGN_OUT:
+    case 'SIGN_OUT':
       return 'You signed out';
-    case ActivityType.UPDATE_PASSWORD:
+    case 'UPDATE_PASSWORD':
       return 'You changed your password';
-    case ActivityType.DELETE_ACCOUNT:
+    case 'DELETE_ACCOUNT':
       return 'You deleted your account';
-    case ActivityType.UPDATE_ACCOUNT:
+    case 'UPDATE_ACCOUNT':
       return 'You updated your account';
-    case ActivityType.CREATE_TEAM:
+    case 'CREATE_TEAM':
       return 'You created a new team';
-    case ActivityType.REMOVE_TEAM_MEMBER:
+    case 'REMOVE_TEAM_MEMBER':
       return 'You removed a team member';
-    case ActivityType.INVITE_TEAM_MEMBER:
+    case 'INVITE_TEAM_MEMBER':
       return 'You invited a team member';
-    case ActivityType.ACCEPT_INVITATION:
+    case 'ACCEPT_INVITATION':
       return 'You accepted an invitation';
     default:
       return 'Unknown action occurred';
@@ -69,7 +71,45 @@ function formatAction(action: ActivityType): string {
 }
 
 export default async function ActivityPage() {
-  const logs = await getActivityLogs();
+  const { userId, redirectToSignIn } = await auth();
+  if (!userId) return redirectToSignIn();
+
+  const user = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, userId))
+    .limit(1);
+
+  if (!user[0]) {
+    return <div>User not found</div>;
+  }
+
+  const userTeam = await db
+    .select({
+      teamId: teamMembers.teamId,
+    })
+    .from(teamMembers)
+    .where(eq(teamMembers.userId, user[0].id))
+    .limit(1);
+
+  if (!userTeam[0]) {
+    return <div>No team found</div>;
+  }
+
+  const logs = await db
+    .select({
+      id: activityLogs.id,
+      action: activityLogs.action,
+      timestamp: activityLogs.timestamp,
+      ipAddress: activityLogs.ipAddress,
+    })
+    .from(activityLogs)
+    .where(and(
+      eq(activityLogs.userId, userId),
+      eq(activityLogs.teamId, userTeam[0].teamId)
+    ))
+    .orderBy(desc(activityLogs.timestamp))
+    .limit(50);
 
   return (
     <section className="flex-1 p-4 lg:p-8">
@@ -84,10 +124,8 @@ export default async function ActivityPage() {
           {logs.length > 0 ? (
             <ul className="space-y-4">
               {logs.map((log) => {
-                const Icon = iconMap[log.action as ActivityType] || Settings;
-                const formattedAction = formatAction(
-                  log.action as ActivityType
-                );
+                const Icon = iconMap[log.action] || Settings;
+                const formattedAction = formatAction(log.action);
 
                 return (
                   <li key={log.id} className="flex items-center space-x-4">

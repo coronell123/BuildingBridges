@@ -5,48 +5,74 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Lock, Trash2, Loader2 } from 'lucide-react';
-import { startTransition, useActionState } from 'react';
-import { updatePassword, deleteAccount } from '@/app/(login)/actions';
-
-type ActionState = {
-  error?: string;
-  success?: string;
-};
+import { useState } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 
 export default function SecurityPage() {
-  const [passwordState, passwordAction, isPasswordPending] = useActionState<
-    ActionState,
-    FormData
-  >(updatePassword, { error: '', success: '' });
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
+  const [isPasswordPending, setIsPasswordPending] = useState(false);
+  const [isDeletePending, setIsDeletePending] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const [deleteState, deleteAction, isDeletePending] = useActionState<
-    ActionState,
-    FormData
-  >(deleteAccount, { error: '', success: '' });
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
 
-  const handlePasswordSubmit = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
+  if (!user) {
+    router.push('/sign-in');
+    return null;
+  }
+
+  const handlePasswordSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // If you call the Server Action directly, it will automatically
-    // reset the form. We don't want that here, because we want to keep the
-    // client-side values in the inputs. So instead, we use an event handler
-    // which calls the action. You must wrap direct calls with startTranstion.
-    // When you use the `action` prop it automatically handles that for you.
-    // Another option here is to persist the values to local storage. I might
-    // explore alternative options.
-    startTransition(() => {
-      passwordAction(new FormData(event.currentTarget));
-    });
+    setIsPasswordPending(true);
+    setError('');
+    setSuccess('');
+
+    const formData = new FormData(event.currentTarget);
+    const currentPassword = formData.get('currentPassword') as string;
+    const newPassword = formData.get('newPassword') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match');
+      setIsPasswordPending(false);
+      return;
+    }
+
+    try {
+      await user.updatePassword({
+        currentPassword,
+        newPassword
+      });
+      setSuccess('Password updated successfully');
+      (event.target as HTMLFormElement).reset();
+    } catch (error) {
+      setError('Failed to update password. Please check your current password.');
+    } finally {
+      setIsPasswordPending(false);
+    }
   };
 
-  const handleDeleteSubmit = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleDeleteSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    startTransition(() => {
-      deleteAction(new FormData(event.currentTarget));
-    });
+    setIsDeletePending(true);
+    setError('');
+
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      try {
+        await user.delete();
+        router.push('/');
+      } catch (error) {
+        setError('Failed to delete account. Please try again.');
+        setIsDeletePending(false);
+      }
+    } else {
+      setIsDeletePending(false);
+    }
   };
 
   return (
@@ -95,12 +121,8 @@ export default function SecurityPage() {
                 maxLength={100}
               />
             </div>
-            {passwordState.error && (
-              <p className="text-red-500 text-sm">{passwordState.error}</p>
-            )}
-            {passwordState.success && (
-              <p className="text-green-500 text-sm">{passwordState.success}</p>
-            )}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {success && <p className="text-green-500 text-sm">{success}</p>}
             <Button
               type="submit"
               className="bg-orange-500 hover:bg-orange-600 text-white"
@@ -128,23 +150,10 @@ export default function SecurityPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-500 mb-4">
-            Account deletion is non-reversable. Please proceed with caution.
+            Account deletion is non-reversible. Please proceed with caution.
           </p>
           <form onSubmit={handleDeleteSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="delete-password">Confirm Password</Label>
-              <Input
-                id="delete-password"
-                name="password"
-                type="password"
-                required
-                minLength={8}
-                maxLength={100}
-              />
-            </div>
-            {deleteState.error && (
-              <p className="text-red-500 text-sm">{deleteState.error}</p>
-            )}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
             <Button
               type="submit"
               variant="destructive"

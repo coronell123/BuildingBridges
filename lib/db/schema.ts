@@ -49,7 +49,7 @@ export const activityLogs = pgTable('activity_logs', {
   teamId: integer('team_id')
     .notNull()
     .references(() => teams.id),
-  userId: integer('user_id').references(() => users.id),
+  userId: text('user_id').notNull(),
   action: text('action').notNull(),
   timestamp: timestamp('timestamp').notNull().defaultNow(),
   ipAddress: varchar('ip_address', { length: 45 }),

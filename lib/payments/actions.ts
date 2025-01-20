@@ -2,14 +2,25 @@
 
 import { redirect } from 'next/navigation';
 import { createCheckoutSession, createCustomerPortalSession } from './stripe';
-import { withTeam } from '@/lib/auth/middleware';
+import { auth } from '@clerk/nextjs/server';
 
-export const checkoutAction = withTeam(async (formData, team) => {
+export async function checkoutAction(formData: FormData) {
+  const { userId, redirectToSignIn } = await auth()
+  if (!userId) return redirectToSignIn();
+
   const priceId = formData.get('priceId') as string;
-  await createCheckoutSession({ team: team, priceId });
-});
+  if (!priceId) throw new Error('No price ID provided');
 
-export const customerPortalAction = withTeam(async (_, team) => {
-  const portalSession = await createCustomerPortalSession(team);
+  await createCheckoutSession({ 
+    userId,
+    priceId 
+  });
+}
+
+export async function customerPortalAction() {
+  const { userId, redirectToSignIn } = await auth();
+  if (!userId) return redirectToSignIn();
+
+  const portalSession = await createCustomerPortalSession(userId);
   redirect(portalSession.url);
-});
+}

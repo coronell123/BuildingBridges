@@ -1,20 +1,9 @@
-import { getUser } from './db/queries';
 import { db } from './db/drizzle';
 import { onboardingData } from './db/schema';
-
+ /*
 export async function saveOnboardingData(answers: Record<string, string>) {
-  const user = await getUser();
-  if (!user) throw new Error('Not authenticated');
-
-  // Save to database using the onboardingData schema
-  await db.insert(onboardingData).values({
-    userId: user.id,
-    challenges: answers.challenges,
-    goals: answers.goals,
-    interests: answers.interests,
-  });
-
-  // Send webhook
+  
+ // Send webhook
   const webhookUrl = 'https://hook.eu2.make.com/oqjg49cmcicp92jnp9zbsl09bwhp2hlv';
   
   const webhookData = {
@@ -51,7 +40,7 @@ export async function saveOnboardingData(answers: Record<string, string>) {
 
   return { success: true };
 }
-
+*/
 function getChallengeDetails(challenge: string): string {
   switch (challenge) {
     case 'discrimination':

@@ -1,37 +1,43 @@
 'use client';
 
-import { startTransition, useActionState } from 'react';
+import { startTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import { useUser } from '@/lib/auth/index';
-import { updateAccount } from '@/app/(login)/actions';
-
-type ActionState = {
-  error?: string;
-  success?: string;
-};
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 
 export default function GeneralPage() {
-  const { user } = useUser();
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    updateAccount,
-    { error: '', success: '' }
-  );
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    router.push('/sign-in');
+    return null;
+  }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // If you call the Server Action directly, it will automatically
-    // reset the form. We don't want that here, because we want to keep the
-    // client-side values in the inputs. So instead, we use an event handler
-    // which calls the action. You must wrap direct calls with startTranstion.
-    // When you use the `action` prop it automatically handles that for you.
-    // Another option here is to persist the values to local storage. I might
-    // explore alternative options.
-    startTransition(() => {
-      formAction(new FormData(event.currentTarget));
+    const form = event.currentTarget;
+    startTransition(async () => {
+      try {
+        await user.update({
+          firstName: (form.elements.namedItem('name') as HTMLInputElement).value,
+        });
+
+        const newEmail = (form.elements.namedItem('email') as HTMLInputElement).value;
+        if (newEmail !== user.primaryEmailAddress?.emailAddress) {
+          await user.createEmailAddress({ email: newEmail });
+        }
+      } catch (error) {
+        console.error('Failed to update user:', error);
+      }
     });
   };
 
@@ -53,7 +59,7 @@ export default function GeneralPage() {
                 id="name"
                 name="name"
                 placeholder="Enter your name"
-                defaultValue={user?.name || ''}
+                defaultValue={user.firstName || ''}
                 required
               />
             </div>
@@ -64,29 +70,15 @@ export default function GeneralPage() {
                 name="email"
                 type="email"
                 placeholder="Enter your email"
-                defaultValue={user?.email || ''}
+                defaultValue={user.primaryEmailAddress?.emailAddress || ''}
                 required
               />
             </div>
-            {state.error && (
-              <p className="text-red-500 text-sm">{state.error}</p>
-            )}
-            {state.success && (
-              <p className="text-green-500 text-sm">{state.success}</p>
-            )}
             <Button
               type="submit"
               className="bg-orange-500 hover:bg-orange-600 text-white"
-              disabled={isPending}
             >
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'Save Changes'
-              )}
+              Save Changes
             </Button>
           </form>
         </CardContent>

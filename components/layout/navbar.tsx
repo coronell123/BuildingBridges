@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { NavigationLinks } from './navigation-links';
-import { useUser } from '@/lib/auth/index';
+import { useUser, SignInButton, SignUpButton, UserButton, SignedIn, SignedOut } from '@clerk/nextjs';
 
 const navItems = [
   { name: 'Vision', href: '/vision' },
@@ -16,7 +15,7 @@ const navItems = [
 ];
 
 export function Navbar() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -52,31 +51,36 @@ export function Navbar() {
               ))}
             </div>
 
-            {/* Auth Buttons - always visible */}
+            {/* Auth Buttons */}
             <div className="flex items-center space-x-4">
-              {user ? (
+              <SignedIn>
                 <Button
                   asChild
                   className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
                 >
                   <Link href="/dashboard">Dashboard</Link>
                 </Button>
-              ) : (
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+              
+              <SignedOut>
                 <div className="flex items-center gap-4">
-                  <Button
-                    asChild
-                    className="bg-white hover:bg-gray-100 text-black text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105"
-                  >
-                    <Link href="/sign-in">Sign In</Link>
-                  </Button>
-                  <Button
-                    asChild
-                    className="bg-gradient-to-b from-[#8c52ff] to-black text-white text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                  >
-                    <Link href="/sign-up">Sign Up</Link>
-                  </Button>
+                  <SignInButton mode="modal">
+                    <Button
+                      className="bg-white hover:bg-gray-100 text-black text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105"
+                    >
+                      Sign In
+                    </Button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <Button
+                      className="bg-gradient-to-b from-[#8c52ff] to-black text-white text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                    >
+                      Sign Up
+                    </Button>
+                  </SignUpButton>
                 </div>
-              )}
+              </SignedOut>
 
               {/* Mobile menu button */}
               <button
