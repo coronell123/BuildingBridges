@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ArrowRight, Heart, Star, Users2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { SignInButton, SignUpButton, SignedIn, SignedOut } from '@clerk/nextjs';
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -57,15 +58,26 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7, duration: 0.6 }}
               >
-                <Button 
-                  asChild 
-                  className="bg-white hover:bg-gray-100 text-black border border-gray-200 rounded-full text-lg px-8 py-4 inline-flex items-center justify-center hover:scale-105 transition-transform duration-300"
-                >
-                  <Link href="/sign-up">
-                    Sei dabei!
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                <SignedIn>
+                  <Link href="/dashboard">
+                    <Button
+                      className="bg-white hover:bg-gray-100 text-black border border-gray-200 rounded-full text-lg px-8 py-4 inline-flex items-center justify-center hover:scale-105 transition-transform duration-300"
+                    >
+                      Sei dabei!
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
                   </Link>
-                </Button>
+                </SignedIn>
+                <SignedOut>
+                  <SignUpButton mode="modal">
+                    <Button 
+                      className="bg-white hover:bg-gray-100 text-black border border-gray-200 rounded-full text-lg px-8 py-4 inline-flex items-center justify-center hover:scale-105 transition-transform duration-300"
+                    >
+                      Sei dabei!
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </SignUpButton>
+                </SignedOut>
               </motion.div>
             </motion.div>
 
@@ -186,12 +198,26 @@ export default function HomePage() {
               </div>
             </div>
             <div className="mt-8 lg:mt-0 flex justify-center lg:justify-end">
-              <Button asChild className="bg-white hover:bg-gray-100 text-black border border-gray-200 rounded-full text-xl px-12 py-6 inline-flex items-center justify-center">
-                <Link href="/sign-up">
-                  Jetzt anmelden
-                  <ArrowRight className="ml-3 h-6 w-6" />
+              <SignedIn>
+                <Link href="/dashboard">
+                  <Button
+                    className="bg-white hover:bg-gray-100 text-black border border-gray-200 rounded-full text-lg px-8 py-4 inline-flex items-center justify-center hover:scale-105 transition-transform duration-300"
+                  >
+                    Jetzt anmelden
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
                 </Link>
-              </Button>
+              </SignedIn>
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <Button 
+                    className="bg-white hover:bg-gray-100 text-black border border-gray-200 rounded-full text-lg px-8 py-4 inline-flex items-center justify-center hover:scale-105 transition-transform duration-300"
+                  >
+                    Jetzt anmelden
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </SignInButton>
+              </SignedOut>
             </div>
           </div>
         </div>
