@@ -1,6 +1,6 @@
 import { stripe } from '../payments/stripe';
 import { db } from './drizzle';
-import { users, teams, teamMembers } from './schema';
+import { users } from './schema';
 import bcrypt from 'bcrypt';
 
 async function createStripeProducts() {
