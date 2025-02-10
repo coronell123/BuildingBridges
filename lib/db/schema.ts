@@ -80,6 +80,12 @@ export const onboardingData = pgTable('onboarding_data', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+export const leads = pgTable('leads', {
+  id: serial('id').primaryKey(),
+  email: text('email').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),

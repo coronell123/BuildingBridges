@@ -1,42 +1,36 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/libs/next-auth";
-import prisma from "@/libs/prisma";
+import { getSession } from "@/lib/auth/session";
+import { db } from "@/lib/db/drizzle";
+import { users } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 // This function handles retrieving the authenticated user's data from the database.
 // The user must be authenticated to access this route.
 
 export async function POST() {
-  // Get the user's session from the authentication system.
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
 
-  // Check if the user is authenticated.
   if (session) {
-    // Extract the user's ID from the session.
-    const { id } = session.user;
-
     try {
-      // Find the user in the database using the ID from the session.
-      const user = await prisma.user.findFirst({ where: { id: +id } });
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, session.user.id))
+        .limit(1);
 
-      // If the user is not found, return a 404 Not Found error.
-      if (!user) {
+      if (!user[0]) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
-      // If the user is found, return the user data with a 200 OK status.
-      return NextResponse.json({ data: user }, { status: 200 });
+      return NextResponse.json({ data: user[0] }, { status: 200 });
     } catch (e) {
       console.error(e);
-
-      // Return a 500 Internal Server Error if something goes wrong.
       return NextResponse.json(
         { error: "Something went wrong" },
         { status: 500 }
       );
     }
   } else {
-    // If the user is not signed in, return a 401 Unauthorized response.
     return NextResponse.json({ error: "Not signed in" }, { status: 401 });
   }
 }

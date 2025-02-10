@@ -1,5 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
-import prisma from "@/libs/prisma";
+import { db } from "@/lib/db/drizzle";
+import { leads } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 // This api is storing waiting list email in the database.
 // The <ButtonLead /> component and waiting-list page triggers the API call.
@@ -20,19 +22,17 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Check if the email already exists in the database.
-    const lead = await prisma.lead.findFirst({
-      where: {
-        email: body.email,
-      },
-    });
+    // Check if the email already exists in the database
+    const existingLead = await db
+      .select()
+      .from(leads)
+      .where(eq(leads.email, body.email))
+      .limit(1);
 
-    // Add the email to the database if it doesn't already exist.
-    if (!lead) {
-      await prisma.lead.create({
-        data: {
-          email: body.email,
-        },
+    // Add the email to the database if it doesn't already exist
+    if (!existingLead[0]) {
+      await db.insert(leads).values({
+        email: body.email,
       });
 
       // Here you can add your own logic
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     console.error(e);
     return NextResponse.json(
       {
-        error: e.message,
+        error: (e as Error).message,
       },
       {
         status: 500,
