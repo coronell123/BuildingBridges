@@ -38,64 +38,6 @@ export default function NotFound() {
           </Button>
         </div>
       </div>
-
-      {/* Footer section */}
-      <footer className="relative bg-gray-50 border-t">
-        <div className="absolute inset-0 bg-[url('/abstract.svg')] bg-center bg-no-repeat bg-cover opacity-10" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Company</h3>
-              <ul className="space-y-3">
-                <li><Link href="/about" className="text-base text-gray-500 hover:text-gray-900">About Us</Link></li>
-                <li><Link href="/contact" className="text-base text-gray-500 hover:text-gray-900">Contact</Link></li>
-                <li><Link href="/faq" className="text-base text-gray-500 hover:text-gray-900">FAQ</Link></li>
-                <li><Link href="/testimonials" className="text-base text-gray-500 hover:text-gray-900">Testimonials</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Resources</h3>
-              <ul className="space-y-3">
-                <li><Link href="/blog" className="text-base text-gray-500 hover:text-gray-900">Blog</Link></li>
-                <li><Link href="/media" className="text-base text-gray-500 hover:text-gray-900">Media</Link></li>
-                <li><Link href="/press" className="text-base text-gray-500 hover:text-gray-900">Press Kit</Link></li>
-                <li><Link href="/partners" className="text-base text-gray-500 hover:text-gray-900">Partners</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Legal</h3>
-              <ul className="space-y-3">
-                <li><Link href="/privacy" className="text-base text-gray-500 hover:text-gray-900">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="text-base text-gray-500 hover:text-gray-900">Terms of Service</Link></li>
-                <li><Link href="/cookies" className="text-base text-gray-500 hover:text-gray-900">Cookie Policy</Link></li>
-                <li><Link href="/disclaimer" className="text-base text-gray-500 hover:text-gray-900">Disclaimer</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Social</h3>
-              <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-gray-500">
-                  <Facebook className="h-6 w-6" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-gray-500">
-                  <Twitter className="h-6 w-6" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-gray-500">
-                  <Instagram className="h-6 w-6" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-gray-500">
-                  <Linkedin className="h-6 w-6" />
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="mt-8 border-t border-gray-200 pt-8">
-            <p className="text-base text-gray-400 text-center">
-              © {new Date().getFullYear()} Building Bridges. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

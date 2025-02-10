@@ -6,25 +6,25 @@ const footerLinks = [
   {
     title: 'About',
     links: [
-      { label: 'Our Story', href: '/about' },
+      { label: 'Vision', href: '/vision' },
       { label: 'Team', href: '/team' },
-      { label: 'Partners', href: '/partners' },
+      { label: 'Contact', href: '/contact' },
     ],
   },
   {
     title: 'Legal',
     links: [
-      { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Terms of Service', href: '/terms' },
-      { label: 'Impressum', href: '/impressum' },
+      { label: 'Terms of Service', href: '/tos' },
+      { label: 'Privacy Policy', href: '/privacy-policy' },
+      { label: 'Imprint', href: '/imprint' },
     ],
   },
   {
-    title: 'Contact',
+    title: 'Community',
     links: [
-      { label: 'Contact Us', href: '/contact' },
-      { label: 'Support', href: '/support' },
-      { label: 'FAQ', href: '/faq' },
+      { label: 'Workshops', href: '/workshops' },
+      { label: 'Activities', href: '/activities' },
+      { label: 'Roadmap', href: '/roadmap' },
     ],
   },
 ];
