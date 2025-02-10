@@ -25,11 +25,8 @@ export default function RootLayout({
   let userPromise = getUser();
 
   return (
-    <html
-      lang="en"
-      className={`bg-white dark:bg-gray-950 text-black dark:text-white ${manrope.className}`}
-    >
-      <body className="min-h-[100dvh] bg-gray-50">
+    <html lang="de" className={manrope.className}>
+      <body className="min-h-[100dvh]">
         <UserProvider userPromise={userPromise}>
           <div className="min-h-screen flex flex-col">
             <Navbar />
