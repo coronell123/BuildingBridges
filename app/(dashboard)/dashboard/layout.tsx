@@ -6,18 +6,12 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Users, Settings, Shield, Activity, Menu, UserCircle } from 'lucide-react';
 import { redirect } from 'next/navigation';
-import { getUser } from '@/lib/db/queries';
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getUser();
-  if (!user) {
-    redirect('/sign-in');
-  }
-
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
