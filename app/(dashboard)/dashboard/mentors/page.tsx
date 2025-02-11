@@ -81,38 +81,251 @@ function formatAction(action: string): string {
 const AIRTABLE_API_KEY = process.env.NEXT_PUBLIC_AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID;
 
-export default function MentorsPage() {
+export default function SignupPage() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    pronouns: '',
+    age: '',
+    studentStatus: '',
+    fieldOfStudy: '',
+    semester: '',
+    university: '',
+    bipocIdentity: '',
+    additionalCategories: '',
+    hasCapacity: '',
+    intersectionalityKnowledge: '',
+    mentorExperience: '',
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const result = await saveMentorData(formData);
+      
+      if (result.success) {
+        alert('Anmeldung erfolgreich! Wir werden uns in Kürze bei dir melden.');
+        setFormData({
+          name: '',
+          email: '',
+          pronouns: '',
+          age: '',
+          studentStatus: '',
+          fieldOfStudy: '',
+          semester: '',
+          university: '',
+          bipocIdentity: '',
+          additionalCategories: '',
+          hasCapacity: '',
+          intersectionalityKnowledge: '',
+          mentorExperience: '',
+        });
+      } else {
+        console.error('Submission error:', result.error);
+        alert('Ein Fehler ist aufgetreten. Bitte versuche es später erneut.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Mentoring</h1>
+    <section className="flex-1 p-4 lg:p-8">
+      <h1 className="text-lg lg:text-2xl font-medium text-gray-900 mb-6">
+        Anmeldeformular – Building Bridges - Mentor:innen
+      </h1>
+      <p className="text-gray-600 mb-8">
+        Herzlich willkommen beim Anmeldeformular für die Mentor:innen des Projekts Building Bridges! 
+        Wir freuen uns, dass du Interesse an der Mitarbeit in unserem Mentor:innen-Programm zeigst.
+      </p>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Persönliche Informationen</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  placeholder="Vollständiger Name"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                  placeholder="Deine Email-Adresse"
+                />
+              </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Mentor*in finden</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600 mb-4">
-              Wir vermitteln dir eine*n BIPoC Mentor*in, die dich auf deinem Weg berät, 
-              unterstützt und inspiriert.
-            </p>
-            <Button className="bg-[#8c52ff] hover:bg-[#7440e0]">
-              Mentor*in anfragen
+              <div>
+                <Label htmlFor="pronouns">Pronomen (optional)</Label>
+                <Input
+                  id="pronouns"
+                  value={formData.pronouns}
+                  onChange={(e) => setFormData({ ...formData, pronouns: e.target.value })}
+                  placeholder="z.B. sie/ihr, er/ihm, they/them"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="age">Alter (optional)</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  value={formData.age}
+                  onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                  placeholder="Dein Alter"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="studentStatus">Studierendenstatus</Label>
+                <Input
+                  id="studentStatus"
+                  value={formData.studentStatus}
+                  onChange={(e) => setFormData({ ...formData, studentStatus: e.target.value })}
+                  required
+                  placeholder="z.B. Bachelor, Master"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="fieldOfStudy">Studienfach</Label>
+                <Input
+                  id="fieldOfStudy"
+                  value={formData.fieldOfStudy}
+                  onChange={(e) => setFormData({ ...formData, fieldOfStudy: e.target.value })}
+                  required
+                  placeholder="Dein Studienfach"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="semester">Semester</Label>
+                <Input
+                  id="semester"
+                  value={formData.semester}
+                  onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
+                  required
+                  placeholder="Aktuelles Semester"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="university">Universität/Hochschule</Label>
+                <Input
+                  id="university"
+                  value={formData.university}
+                  onChange={(e) => setFormData({ ...formData, university: e.target.value })}
+                  required
+                  placeholder="Name der Universität/Hochschule"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="bipocIdentity">BIPoC Person - Selbstbeschreibung</Label>
+              <Input
+                id="bipocIdentity"
+                value={formData.bipocIdentity}
+                onChange={(e) => setFormData({ ...formData, bipocIdentity: e.target.value })}
+                required
+                placeholder="z.B. Ich bin eine Schwarze Person / jüdisch / türkisch, etc."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="additionalCategories">Weitere zu berücksichtigende Kategorien</Label>
+              <Input
+                id="additionalCategories"
+                value={formData.additionalCategories}
+                onChange={(e) => setFormData({ ...formData, additionalCategories: e.target.value })}
+                placeholder="z.B. queer, Arbeiter:innenkind, neurodivergent"
+              />
+            </div>
+
+            <div>
+              <Label>Kapazitäten mit bis zu 50 Stunden im Projektzeitraum 09 2025 – 09 2026?</Label>
+              <RadioGroup
+                value={formData.hasCapacity}
+                onValueChange={(value) => setFormData({ ...formData, hasCapacity: value })}
+                required
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="yes" id="capacity-yes" />
+                  <Label htmlFor="capacity-yes">Ja</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="no" id="capacity-no" />
+                  <Label htmlFor="capacity-no">Nein</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div>
+              <Label>Intersektionalität</Label>
+              <RadioGroup
+                value={formData.intersectionalityKnowledge}
+                onValueChange={(value) => setFormData({ ...formData, intersectionalityKnowledge: value })}
+                required
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="experienced" id="intersectionality-experienced" />
+                  <Label htmlFor="intersectionality-experienced">Ich habe mich mit dem Konzept auseinandergesetzt</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="familiar" id="intersectionality-familiar" />
+                  <Label htmlFor="intersectionality-familiar">Ich kenne das Konzept</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="unfamiliar" id="intersectionality-unfamiliar" />
+                  <Label htmlFor="intersectionality-unfamiliar">Ich kenne das Konzept noch nicht</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div>
+              <Label>Mentor:in Erfahrung</Label>
+              <RadioGroup
+                value={formData.mentorExperience}
+                onValueChange={(value) => setFormData({ ...formData, mentorExperience: value })}
+                required
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="yes" id="experience-yes" />
+                  <Label htmlFor="experience-yes">Ja</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="no" id="experience-no" />
+                  <Label htmlFor="experience-no">Nein</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="similar" id="experience-similar" />
+                  <Label htmlFor="experience-similar">Habe etwas ähnliches gemacht</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <Button type="submit" className="w-full">
+              Anmeldung absenden
             </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Meine Mentoring Sessions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600">
-              Hier findest du eine Übersicht deiner vergangenen und geplanten Mentoring Sessions.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          </form>
+        </CardContent>
+      </Card>
+    </section>
   );
 }
