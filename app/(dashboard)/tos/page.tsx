@@ -62,9 +62,8 @@ export default function TermsOfServicePage() {
 
           <h3 className="text-xl font-semibold mt-6 mb-3">8. Kontakt</h3>
           <p>Bei Fragen oder Anliegen können Sie sich an uns wenden:</p>
-          <p className="mb-1">Kontaktperson: Susanne Birnkammer</p>
-          <p className="mb-1">E-Mail: susanne.birnkammer@fu-berlin.de</p>
-          <p>Telefon: +49 30 838 75634</p>
+          <p className="mb-1">Kontakt: Team Building Bridges</p>
+          <p className="mb-1">E-Mail: team@buildingbridges.de</p>
         </CardContent>
       </Card>
 
