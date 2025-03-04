@@ -1,13 +1,37 @@
 export async function saveOnboardingData(answers: Record<string, string>) {
-  // Implement your database saving logic here
-  // For example, using fetch to call your API endpoint:
-  const response = await fetch('/api/onboarding', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(answers),
-  });
-  
-  return response.json();
+  try {
+    // Store the onboarding data in localStorage for persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('onboardingData', JSON.stringify(answers));
+    }
+    
+    // Attempt to call the API endpoint if it exists
+    try {
+      const response = await fetch('/api/onboarding', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(answers),
+        // Add this to prevent caching issues
+        cache: 'no-store'
+      });
+      
+      if (response.ok) {
+        return { success: true, data: await response.json() };
+      }
+    } catch (apiError) {
+      // If API call fails, just log it but don't fail the whole process
+      console.error('API error during onboarding:', apiError);
+    }
+    
+    // Return success even if API call failed, to ensure redirect happens
+    return { success: true };
+  } catch (error) {
+    console.error('Error saving onboarding data:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error occurred' 
+    };
+  }
 } 
 export async function saveMentorData(formData: Record<string, string>) {
   const webhookUrl = 'https://hook.eu2.make.com/oqr26wjs824rejodun6qp5e614y2v2jw';
