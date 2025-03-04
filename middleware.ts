@@ -3,11 +3,22 @@ import type { NextRequest } from 'next/server';
 import { signToken, verifyToken } from '@/lib/auth/session';
 
 const protectedRoutes = '/dashboard';
+// Explicitly exclude the mentors page and mentors-redirect from protection
+const publicPaths = ['/mentors', '/dashboard/mentors', '/dashboard/mentors-redirect'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionCookie = request.cookies.get('session');
-  const isProtectedRoute = pathname.startsWith(protectedRoutes);
+  
+  // Check if the current path is in the public paths list
+  const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
+  // Only consider it a protected route if it's not a public path
+  const isProtectedRoute = pathname.startsWith(protectedRoutes) && !isPublicPath;
+
+  // Direct server-side redirect for mentors paths
+  if (pathname === '/dashboard/mentors' || pathname === '/dashboard/mentors/') {
+    return NextResponse.redirect(new URL('/mentors', request.url));
+  }
 
   if (isProtectedRoute && !sessionCookie) {
     return NextResponse.redirect(new URL('/sign-in', request.url));

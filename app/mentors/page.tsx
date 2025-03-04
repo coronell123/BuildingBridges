@@ -6,82 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useState } from 'react';
-import {
-  Settings,
-  LogOut,
-  UserPlus,
-  Lock,
-  UserCog,
-  AlertCircle,
-  UserMinus,
-  Mail,
-  CheckCircle,
-  type LucideIcon,
-} from 'lucide-react';
-import { db } from '@/lib/db/drizzle';
-import { activityLogs, teamMembers, users } from '@/lib/db/schema';
-import { desc, eq, and } from 'drizzle-orm';
 import { saveMentorData } from '@/lib/actions';
 
-const iconMap: Record<string, LucideIcon> = {
-  'SIGN_UP': UserPlus,
-  'SIGN_IN': UserCog,
-  'SIGN_OUT': LogOut,
-  'UPDATE_PASSWORD': Lock,
-  'DELETE_ACCOUNT': UserMinus,
-  'UPDATE_ACCOUNT': Settings,
-  'CREATE_TEAM': UserPlus,
-  'REMOVE_TEAM_MEMBER': UserMinus,
-  'INVITE_TEAM_MEMBER': Mail,
-  'ACCEPT_INVITATION': CheckCircle,
-};
-
-function getRelativeTime(date: Date) {
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) return 'just now';
-  if (diffInSeconds < 3600)
-    return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-  if (diffInSeconds < 86400)
-    return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  if (diffInSeconds < 604800)
-    return `${Math.floor(diffInSeconds / 86400)} days ago`;
-  return date.toLocaleDateString();
-}
-
-function formatAction(action: string): string {
-  switch (action) {
-    case 'SIGN_UP':
-      return 'You signed up';
-    case 'SIGN_IN':
-      return 'You signed in';
-    case 'SIGN_OUT':
-      return 'You signed out';
-    case 'UPDATE_PASSWORD':
-      return 'You changed your password';
-    case 'DELETE_ACCOUNT':
-      return 'You deleted your account';
-    case 'UPDATE_ACCOUNT':
-      return 'You updated your account';
-    case 'CREATE_TEAM':
-      return 'You created a new team';
-    case 'REMOVE_TEAM_MEMBER':
-      return 'You removed a team member';
-    case 'INVITE_TEAM_MEMBER':
-      return 'You invited a team member';
-    case 'ACCEPT_INVITATION':
-      return 'You accepted an invitation';
-    default:
-      return 'Unknown action occurred';
-  }
-}
-
-// Create an Airtable client
-const AIRTABLE_API_KEY = process.env.NEXT_PUBLIC_AIRTABLE_API_KEY;
-const AIRTABLE_BASE_ID = process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID;
-
-export default function SignupPage() {
+export default function MentorsPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -132,8 +59,8 @@ export default function SignupPage() {
   };
 
   return (
-    <section className="flex-1 p-4 lg:p-8">
-      <h1 className="text-lg lg:text-2xl font-medium text-gray-900 mb-6">
+    <div className="container mx-auto py-24 px-4">
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">
         Anmeldeformular – Building Bridges - Mentor:innen
       </h1>
       <p className="text-gray-600 mb-8">
@@ -249,17 +176,17 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <Label htmlFor="additionalCategories">Weitere zu berücksichtigende Kategorien</Label>
+              <Label htmlFor="additionalCategories">Weitere Kategorien (optional)</Label>
               <Input
                 id="additionalCategories"
                 value={formData.additionalCategories}
                 onChange={(e) => setFormData({ ...formData, additionalCategories: e.target.value })}
-                placeholder="z.B. queer, Arbeiter:innenkind, neurodivergent"
+                placeholder="z.B. LGBTQIA+, Behinderung, etc."
               />
             </div>
 
             <div>
-              <Label>Kapazitäten mit bis zu 50 Stunden im Projektzeitraum 09 2025 – 09 2026?</Label>
+              <Label>Hast du Kapazitäten, um regelmäßig an Treffen teilzunehmen?</Label>
               <RadioGroup
                 value={formData.hasCapacity}
                 onValueChange={(value) => setFormData({ ...formData, hasCapacity: value })}
@@ -273,27 +200,31 @@ export default function SignupPage() {
                   <RadioGroupItem value="no" id="capacity-no" />
                   <Label htmlFor="capacity-no">Nein</Label>
                 </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="maybe" id="capacity-maybe" />
+                  <Label htmlFor="capacity-maybe">Vielleicht</Label>
+                </div>
               </RadioGroup>
             </div>
 
             <div>
-              <Label>Intersektionalität</Label>
+              <Label>Kenntnisse über Intersektionalität</Label>
               <RadioGroup
                 value={formData.intersectionalityKnowledge}
                 onValueChange={(value) => setFormData({ ...formData, intersectionalityKnowledge: value })}
                 required
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="experienced" id="intersectionality-experienced" />
-                  <Label htmlFor="intersectionality-experienced">Ich habe mich mit dem Konzept auseinandergesetzt</Label>
+                  <RadioGroupItem value="yes" id="knowledge-yes" />
+                  <Label htmlFor="knowledge-yes">Ja</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="familiar" id="intersectionality-familiar" />
-                  <Label htmlFor="intersectionality-familiar">Ich kenne das Konzept</Label>
+                  <RadioGroupItem value="no" id="knowledge-no" />
+                  <Label htmlFor="knowledge-no">Nein</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="unfamiliar" id="intersectionality-unfamiliar" />
-                  <Label htmlFor="intersectionality-unfamiliar">Ich kenne das Konzept noch nicht</Label>
+                  <RadioGroupItem value="some" id="knowledge-some" />
+                  <Label htmlFor="knowledge-some">Ein bisschen</Label>
                 </div>
               </RadioGroup>
             </div>
@@ -326,6 +257,6 @@ export default function SignupPage() {
           </form>
         </CardContent>
       </Card>
-    </section>
+    </div>
   );
-}
+} 

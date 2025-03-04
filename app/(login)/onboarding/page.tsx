@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { saveOnboardingData } from '@/lib/actions';
 import { useRouter } from 'next/navigation';
 
@@ -56,14 +56,49 @@ const onboardingSteps: OnboardingStep[] = [
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Check if user is already onboarded
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      try {
+        // You could check localStorage or make an API call here
+        const onboardingData = localStorage.getItem('onboardingData');
+        if (onboardingData) {
+          // If already onboarded, redirect to dashboard
+          router.push('/dashboard');
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+      }
+    };
+    
+    checkOnboardingStatus();
+  }, [router]);
 
   const handleNext = async () => {
     if (currentStep === onboardingSteps.length - 1) {
-      // Save answers to database
-      await saveOnboardingData(answers);
-      // Use Next.js router instead of window.location
-      router.push('/dashboard');
+      try {
+        setIsSubmitting(true);
+        setError(null);
+        
+        // Save answers to database
+        const result = await saveOnboardingData(answers);
+        
+        if (result.success) {
+          // Use Next.js router for navigation
+          router.push('/dashboard');
+        } else {
+          setError(result.error || 'Failed to save onboarding data. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error during onboarding:', error);
+        setError('An unexpected error occurred. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       setCurrentStep(prev => prev + 1);
     }
@@ -91,6 +126,12 @@ export default function OnboardingPage() {
             Step {currentStep + 1} of {onboardingSteps.length}
           </p>
         </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+            {error}
+          </div>
+        )}
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -133,17 +174,34 @@ export default function OnboardingPage() {
                   <Button
                     variant="outline"
                     onClick={handlePrevious}
-                    disabled={currentStep === 0}
+                    disabled={currentStep === 0 || isSubmitting}
+                    className="flex items-center"
                   >
                     <ChevronLeft className="mr-2 h-4 w-4" />
-                    Previous
+                    Back
                   </Button>
+                  
                   <Button
                     onClick={handleNext}
-                    disabled={!answers[onboardingSteps[currentStep].id]}
+                    disabled={!answers[onboardingSteps[currentStep].id] || isSubmitting}
+                    className="bg-[#8c52ff] hover:bg-[#7340d3] text-white flex items-center"
                   >
-                    {currentStep === onboardingSteps.length - 1 ? 'Finish' : 'Next'}
-                    <ChevronRight className="ml-2 h-4 w-4" />
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : currentStep === onboardingSteps.length - 1 ? (
+                      <>
+                        Finish
+                        <ChevronRight className="ml-2 h-4 w-4" />
+                      </>
+                    ) : (
+                      <>
+                        Next
+                        <ChevronRight className="ml-2 h-4 w-4" />
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardContent>
