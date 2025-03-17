@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/lib/design-system/components';
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -45,8 +45,9 @@ export function Navbar() {
               {navItems.map((item) => (
                 <Button
                   key={item.name}
+                  variant="default"
+                  className="px-6"
                   asChild
-                  className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full px-6 py-2 transition-all duration-300 hover:scale-105 hover:shadow-lg"
                 >
                   <Link href={item.href}>{item.name}</Link>
                 </Button>
@@ -57,22 +58,24 @@ export function Navbar() {
             <div className="flex items-center space-x-4">
               {user ? (
                 <Button
+                  variant="default"
                   asChild
-                  className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
                 >
                   <Link href="/dashboard">Dashboard</Link>
                 </Button>
               ) : (
                 <div className="flex items-center gap-4">
                   <Button
+                    variant="outline"
+                    size="md"
                     asChild
-                    className="bg-white hover:bg-gray-100 text-black text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105"
                   >
                     <Link href="/sign-in">Sign In</Link>
                   </Button>
                   <Button
+                    variant="default"
+                    size="md"
                     asChild
-                    className="bg-gradient-to-b from-[#8c52ff] to-black text-white text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
                   >
                     <Link href="/sign-up">Sign Up</Link>
                   </Button>
@@ -103,8 +106,9 @@ export function Navbar() {
               {navItems.map((item) => (
                 <Button
                   key={item.name}
+                  variant="default"
+                  className="w-full mb-2"
                   asChild
-                  className="w-full bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full px-6 py-2 transition-all duration-300 hover:scale-105 hover:shadow-lg mb-2"
                   onClick={() => setIsOpen(false)}
                 >
                   <Link href={item.href}>{item.name}</Link>
