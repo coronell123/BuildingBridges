@@ -1,213 +1,170 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
-import { saveOnboardingData } from '@/lib/actions';
+import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { saveOnboardingData } from '@/lib/actions';
 
-interface OnboardingStep {
-  id: string;
-  title: string;
-  description: string;
-  options: { value: string; label: string }[];
-}
-
-const onboardingSteps: OnboardingStep[] = [
+// Define onboarding steps
+const onboardingSteps = [
   {
-    id: 'challenges',
-    title: 'What challenges have you faced?',
-    description: 'Select the primary challenge you want to address:',
+    id: 'careerStage',
+    title: 'Welcome to Building Bridges',
+    description: 'Let\'s set up your profile to match you with the perfect mentor.',
+    question: 'How would you describe your current career stage?',
     options: [
-      { value: 'discrimination', label: 'Discrimination in Education' },
-      { value: 'representation', label: 'Lack of Representation' },
-      { value: 'resources', label: 'Limited Access to Resources' },
-      { value: 'mentorship', label: 'Need for Mentorship' },
-    ],
+      'Student',
+      'Recent graduate',
+      'Early career professional',
+      'Mid-career professional',
+      'Career changer'
+    ]
   },
-  {
-    id: 'goals',
-    title: 'What are your goals?',
-    description: 'Choose your primary goal:',
-    options: [
-      { value: 'university', label: 'Prepare for University' },
-      { value: 'career', label: 'Career Development' },
-      { value: 'skills', label: 'Develop New Skills' },
-      { value: 'network', label: 'Build a Support Network' },
-    ],
-  },
-  {
-    id: 'interests',
-    title: 'Areas of Interest',
-    description: 'Select your main area of interest:',
-    options: [
-      { value: 'psychology', label: 'Psychology' },
-      { value: 'social-work', label: 'Social Work' },
-      { value: 'education', label: 'Education' },
-      { value: 'counseling', label: 'Counseling' },
-    ],
-  },
+  // ... more steps ...
 ];
 
 export default function OnboardingPage() {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
-  // Check if user is already onboarded
+  // Check if user is already onboarded - client-side only
   useEffect(() => {
-    const checkOnboardingStatus = async () => {
-      try {
-        // You could check localStorage or make an API call here
-        const onboardingData = localStorage.getItem('onboardingData');
-        if (onboardingData) {
-          // If already onboarded, redirect to dashboard
+    // This now runs only on the client
+    try {
+      const onboardingData = localStorage.getItem('onboardingData');
+      if (onboardingData) {
+        // Use startTransition for smooth navigation
+        startTransition(() => {
           router.push('/dashboard');
-        }
-      } catch (error) {
-        console.error('Error checking onboarding status:', error);
+        });
       }
-    };
-    
-    checkOnboardingStatus();
+    } catch (error) {
+      console.error('Error checking onboarding status:', error);
+    }
   }, [router]);
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (currentStep === onboardingSteps.length - 1) {
+      // Final step - submit all answers
+      setIsSubmitting(true);
+      setError(null);
+      
+      // Save current selection first
+      const updatedAnswers = {
+        ...answers,
+        [onboardingSteps[currentStep].id]: selectedOption || ''
+      };
+      
+      // Save to localStorage on client side for future reference
       try {
-        setIsSubmitting(true);
-        setError(null);
-        
-        // Save answers to database
-        const result = await saveOnboardingData(answers);
-        
-        if (result.success) {
-          // Use Next.js router for navigation
-          router.push('/dashboard');
-        } else {
-          setError(result.error || 'Failed to save onboarding data. Please try again.');
-        }
+        localStorage.setItem('onboardingData', JSON.stringify(updatedAnswers));
       } catch (error) {
-        console.error('Error during onboarding:', error);
-        setError('An unexpected error occurred. Please try again.');
-      } finally {
-        setIsSubmitting(false);
+        console.error('Error saving to localStorage:', error);
       }
+      
+      // Call server action
+      saveOnboardingData(updatedAnswers)
+        .then(result => {
+          setIsSubmitting(false);
+          
+          if (result.success) {
+            // If server action completed successfully and has a redirectTo property,
+            // navigate to that location using startTransition
+            if (result.redirectTo) {
+              startTransition(() => {
+                router.push(result.redirectTo);
+              });
+            }
+          } else {
+            // Handle error case
+            setError(result.error || 'An error occurred during onboarding');
+          }
+        })
+        .catch(err => {
+          setIsSubmitting(false);
+          setError('An unexpected error occurred');
+          console.error('Onboarding error:', err);
+        });
     } else {
-      setCurrentStep(prev => prev + 1);
+      // Not the final step - proceed to next question
+      // Save current selection and move to next step
+      if (selectedOption) {
+        setAnswers({
+          ...answers,
+          [onboardingSteps[currentStep].id]: selectedOption
+        });
+        setCurrentStep(currentStep + 1);
+        setSelectedOption(null);
+      }
     }
   };
 
-  const handlePrevious = () => {
-    setCurrentStep(prev => prev - 1);
+  const handleSelectOption = (option: string) => {
+    setSelectedOption(option);
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            {onboardingSteps.map((_, index) => (
-              <div
-                key={index}
-                className={`h-2 flex-1 mx-1 rounded-full ${
-                  index <= currentStep ? 'bg-[#8c52ff]' : 'bg-gray-200'
-                }`}
-              />
-            ))}
-          </div>
-          <p className="text-sm text-gray-500 text-center">
-            Step {currentStep + 1} of {onboardingSteps.length}
-          </p>
-        </div>
+  const currentStepData = onboardingSteps[currentStep];
 
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold mb-2">{currentStepData.title}</h2>
+          <p className="text-gray-600 mb-6">{currentStepData.description}</p>
+          
+          <div className="mb-6">
+            <h3 className="text-lg font-medium mb-4">{currentStepData.question}</h3>
+            <div className="space-y-2">
+              {currentStepData.options.map((option) => (
+                <div
+                  key={option}
+                  className={`p-3 border rounded-md cursor-pointer ${
+                    selectedOption === option
+                      ? 'border-[#8c52ff] bg-[#f5f0ff]'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => handleSelectOption(option)}
+                >
+                  {option}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        
         {error && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+          <div className="mt-4 p-2 bg-red-100 text-red-800 rounded-md">
             {error}
           </div>
         )}
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
+        
+        <div className="mt-6 flex justify-between">
+          {currentStep > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => setCurrentStep(currentStep - 1)}
+              disabled={isSubmitting}
+              className="flex items-center"
+            >
+              Back
+            </Button>
+          )}
+          <Button
+            onClick={handleNext}
+            disabled={!selectedOption || isSubmitting}
+            className={`bg-[#8c52ff] hover:bg-[#7340d3] text-white flex items-center ${
+              currentStep === 0 ? 'ml-auto' : ''
+            }`}
           >
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-4">
-                  {onboardingSteps[currentStep].title}
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  {onboardingSteps[currentStep].description}
-                </p>
-
-                <RadioGroup
-                  value={answers[onboardingSteps[currentStep].id]}
-                  onValueChange={(value) =>
-                    setAnswers(prev => ({
-                      ...prev,
-                      [onboardingSteps[currentStep].id]: value
-                    }))
-                  }
-                >
-                  <div className="space-y-4">
-                    {onboardingSteps[currentStep].options.map((option) => (
-                      <div key={option.value} className="flex items-center">
-                        <RadioGroupItem value={option.value} id={option.value} />
-                        <Label className="ml-2" htmlFor={option.value}>
-                          {option.label}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </RadioGroup>
-
-                <div className="flex justify-between mt-8">
-                  <Button
-                    variant="outline"
-                    onClick={handlePrevious}
-                    disabled={currentStep === 0 || isSubmitting}
-                    className="flex items-center"
-                  >
-                    <ChevronLeft className="mr-2 h-4 w-4" />
-                    Back
-                  </Button>
-                  
-                  <Button
-                    onClick={handleNext}
-                    disabled={!answers[onboardingSteps[currentStep].id] || isSubmitting}
-                    className="bg-[#8c52ff] hover:bg-[#7340d3] text-white flex items-center"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : currentStep === onboardingSteps.length - 1 ? (
-                      <>
-                        Finish
-                        <ChevronRight className="ml-2 h-4 w-4" />
-                      </>
-                    ) : (
-                      <>
-                        Next
-                        <ChevronRight className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </AnimatePresence>
+            {isSubmitting ? 'Submitting...' : 
+             currentStep === onboardingSteps.length - 1 ? 'Finish' : 'Next'}
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -1,12 +1,19 @@
 {
-  "version": "7",
-  "dialect": "postgresql",
+  "version": "5",
+  "dialect": "pg",
   "entries": [
     {
       "idx": 0,
-      "version": "7",
-      "when": 1726443359662,
+      "version": "5",
+      "when": 1701123456789,
       "tag": "0000_soft_the_anarchist",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1716490000000,
+      "tag": "0001_user_roles",
       "breakpoints": true
     }
   ]

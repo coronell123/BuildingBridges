@@ -1,11 +1,10 @@
+'use server';
+
 export async function saveOnboardingData(answers: Record<string, string>) {
   try {
-    // Store the onboarding data in localStorage for persistence
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('onboardingData', JSON.stringify(answers));
-    }
+    // Note: Server actions cannot access localStorage as it's client-side only
     
-    // Attempt to call the API endpoint if it exists
+    // First, try to save the data to API
     try {
       const response = await fetch('/api/onboarding', {
         method: 'POST',
@@ -14,17 +13,23 @@ export async function saveOnboardingData(answers: Record<string, string>) {
         // Add this to prevent caching issues
         cache: 'no-store'
       });
-      
-      if (response.ok) {
-        return { success: true, data: await response.json() };
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('API error response:', errorData);
+        // Continue even if API fails - we'll just log the error
       }
     } catch (apiError) {
       // If API call fails, just log it but don't fail the whole process
       console.error('API error during onboarding:', apiError);
+      // Continue with the process even if API fails
     }
     
-    // Return success even if API call failed, to ensure redirect happens
-    return { success: true };
+    // Return success with redirectTo property to help with client-side navigation
+    return { 
+      success: true,
+      redirectTo: '/dashboard' // Include the redirect destination
+    };
   } catch (error) {
     console.error('Error saving onboarding data:', error);
     return { 
@@ -33,6 +38,7 @@ export async function saveOnboardingData(answers: Record<string, string>) {
     };
   }
 } 
+
 export async function saveMentorData(formData: Record<string, string>) {
   const webhookUrl = 'https://hook.eu2.make.com/oqr26wjs824rejodun6qp5e614y2v2jw';
   

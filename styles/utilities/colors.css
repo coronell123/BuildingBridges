@@ -1,0 +1,255 @@
+/* Building Bridges Website - Color Utilities
+ *
+ * This file provides utility classes for applying colors consistently
+ * across the application. All classes follow a consistent naming pattern
+ * and are designed to work with our color token system.
+ */
+
+/* Background Colors */
+.bg-primary-50 { background-color: var(--primary-50); }
+.bg-primary-100 { background-color: var(--primary-100); }
+.bg-primary-200 { background-color: var(--primary-200); }
+.bg-primary-300 { background-color: var(--primary-300); }
+.bg-primary-400 { background-color: var(--primary-400); }
+.bg-primary-500 { background-color: var(--primary-500); }
+.bg-primary-600 { background-color: var(--primary-600); }
+.bg-primary-700 { background-color: var(--primary-700); }
+.bg-primary-800 { background-color: var(--primary-800); }
+.bg-primary-900 { background-color: var(--primary-900); }
+
+.bg-secondary-50 { background-color: var(--secondary-50); }
+.bg-secondary-100 { background-color: var(--secondary-100); }
+.bg-secondary-200 { background-color: var(--secondary-200); }
+.bg-secondary-300 { background-color: var(--secondary-300); }
+.bg-secondary-400 { background-color: var(--secondary-400); }
+.bg-secondary-500 { background-color: var(--secondary-500); }
+.bg-secondary-600 { background-color: var(--secondary-600); }
+.bg-secondary-700 { background-color: var(--secondary-700); }
+.bg-secondary-800 { background-color: var(--secondary-800); }
+.bg-secondary-900 { background-color: var(--secondary-900); }
+
+.bg-accent-50 { background-color: var(--accent-50); }
+.bg-accent-100 { background-color: var(--accent-100); }
+.bg-accent-200 { background-color: var(--accent-200); }
+.bg-accent-300 { background-color: var(--accent-300); }
+.bg-accent-400 { background-color: var(--accent-400); }
+.bg-accent-500 { background-color: var(--accent-500); }
+.bg-accent-600 { background-color: var(--accent-600); }
+.bg-accent-700 { background-color: var(--accent-700); }
+.bg-accent-800 { background-color: var(--accent-800); }
+.bg-accent-900 { background-color: var(--accent-900); }
+
+/* Text Colors */
+.text-primary-50 { color: var(--primary-50); }
+.text-primary-100 { color: var(--primary-100); }
+.text-primary-200 { color: var(--primary-200); }
+.text-primary-300 { color: var(--primary-300); }
+.text-primary-400 { color: var(--primary-400); }
+.text-primary-500 { color: var(--primary-500); }
+.text-primary-600 { color: var(--primary-600); }
+.text-primary-700 { color: var(--primary-700); }
+.text-primary-800 { color: var(--primary-800); }
+.text-primary-900 { color: var(--primary-900); }
+
+.text-secondary-50 { color: var(--secondary-50); }
+.text-secondary-100 { color: var(--secondary-100); }
+.text-secondary-200 { color: var(--secondary-200); }
+.text-secondary-300 { color: var(--secondary-300); }
+.text-secondary-400 { color: var(--secondary-400); }
+.text-secondary-500 { color: var(--secondary-500); }
+.text-secondary-600 { color: var(--secondary-600); }
+.text-secondary-700 { color: var(--secondary-700); }
+.text-secondary-800 { color: var(--secondary-800); }
+.text-secondary-900 { color: var(--secondary-900); }
+
+/* Semantic Colors */
+.bg-surface { background-color: var(--surface-0); }
+.bg-surface-elevated { background-color: var(--surface-1); }
+.bg-surface-raised { background-color: var(--surface-2); }
+.bg-surface-overlay { background-color: var(--surface-3); }
+
+.text-default { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-disabled { color: var(--text-disabled); }
+.text-inverse { color: var(--text-inverse); }
+
+/* Status Colors */
+.bg-success { background-color: var(--success-500); }
+.bg-success-light { background-color: var(--success-50); }
+.bg-success-dark { background-color: var(--success-900); }
+
+.bg-warning { background-color: var(--warning-500); }
+.bg-warning-light { background-color: var(--warning-50); }
+.bg-warning-dark { background-color: var(--warning-900); }
+
+.bg-error { background-color: var(--error-500); }
+.bg-error-light { background-color: var(--error-50); }
+.bg-error-dark { background-color: var(--error-900); }
+
+.bg-info { background-color: var(--info-500); }
+.bg-info-light { background-color: var(--info-50); }
+.bg-info-dark { background-color: var(--info-900); }
+
+/* Border Colors */
+.border-light { border-color: var(--border-light); }
+.border-medium { border-color: var(--border-medium); }
+.border-heavy { border-color: var(--border-heavy); }
+
+/* Interactive States */
+.hover\:bg-primary-600:hover { background-color: var(--primary-600); }
+.hover\:bg-primary-700:hover { background-color: var(--primary-700); }
+.hover\:bg-secondary-600:hover { background-color: var(--secondary-600); }
+.hover\:bg-accent-600:hover { background-color: var(--accent-600); }
+
+.focus\:ring-primary:focus { 
+  box-shadow: 0 0 0 2px var(--primary-200);
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+.focus\:ring-error:focus {
+  box-shadow: 0 0 0 2px var(--error-200);
+  outline: 2px solid var(--error-500);
+  outline-offset: 2px;
+}
+
+/* Gradients */
+.bg-gradient-primary {
+  background-image: linear-gradient(
+    to bottom right,
+    var(--primary-400),
+    var(--primary-600)
+  );
+}
+
+.bg-gradient-secondary {
+  background-image: linear-gradient(
+    to bottom right,
+    var(--secondary-400),
+    var(--secondary-600)
+  );
+}
+
+/* Shadows with Color */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 var(--shadow-color);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px var(--shadow-color),
+              0 2px 4px -1px var(--shadow-color-darker);
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px var(--shadow-color),
+              0 4px 6px -2px var(--shadow-color-darker);
+}
+
+/* Enhanced Focus States */
+.focus-ring {
+  transition: box-shadow var(--transition-shadow),
+              outline var(--transition-shadow);
+}
+
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 4px rgba(var(--focus-ring-color) / var(--focus-ring-alpha));
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+.focus-ring-error:focus-visible {
+  --focus-ring-color: var(--focus-ring-error);
+}
+
+.focus-ring-success:focus-visible {
+  --focus-ring-color: var(--focus-ring-success);
+}
+
+/* Form States */
+.input-border { border-color: var(--input-border); }
+.input-border-hover:hover { border-color: var(--input-border-hover); }
+.input-border-focus:focus { border-color: var(--input-border-focus); }
+.input-border-error { border-color: var(--input-border-error); }
+.input-border-success { border-color: var(--input-border-success); }
+
+.input-bg { background-color: var(--input-bg); }
+.input-bg-disabled { background-color: var(--input-bg-disabled); }
+
+/* Transition Utilities */
+.transition-colors {
+  transition-property: color, background-color, border-color, outline-color, fill, stroke;
+  transition-duration: var(--transition-colors);
+  transition-timing-function: ease-in-out;
+}
+
+.transition-shadow {
+  transition-property: box-shadow;
+  transition-duration: var(--transition-shadow);
+  transition-timing-function: ease-in-out;
+}
+
+.transition-transform {
+  transition-property: transform;
+  transition-duration: var(--transition-transform);
+  transition-timing-function: ease-in-out;
+}
+
+/* Enhanced Shadow Utilities */
+.shadow-light {
+  box-shadow: 0 1px 2px 0 var(--shadow-color-light);
+}
+
+.shadow-medium {
+  box-shadow: 0 4px 6px -1px var(--shadow-color-medium),
+              0 2px 4px -1px var(--shadow-color-heavy);
+}
+
+.shadow-heavy {
+  box-shadow: 0 10px 15px -3px var(--shadow-color-medium),
+              0 4px 6px -2px var(--shadow-color-heavy);
+}
+
+/* Interactive State Combinations */
+.interactive-primary {
+  @apply bg-primary-500
+         text-white
+         transition-colors
+         hover:bg-primary-600
+         focus-ring
+         active:bg-primary-700;
+}
+
+.interactive-secondary {
+  @apply bg-secondary-500
+         text-white
+         transition-colors
+         hover:bg-secondary-600
+         focus-ring
+         active:bg-secondary-700;
+}
+
+.interactive-accent {
+  @apply bg-accent-500
+         text-white
+         transition-colors
+         hover:bg-accent-600
+         focus-ring
+         active:bg-accent-700;
+}
+
+/* Gradient Opacity Control */
+.gradient-primary-fade {
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(var(--primary-400) / 0.9),
+    rgba(var(--primary-600) / 0.9)
+  );
+}
+
+.gradient-secondary-fade {
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(var(--secondary-400) / 0.9),
+    rgba(var(--secondary-600) / 0.9)
+  );
+} 

@@ -1,0 +1,62 @@
+{
+  "id": "0001_snapshot",
+  "dependsOn": ["0000_snapshot"],
+  "name": "user_roles",
+  "schema": {
+    "enums": {
+      "user_role": {
+        "values": ["ADMIN", "STUDENT", "MENTOR"]
+      }
+    },
+    "tables": {
+      "users": {
+        "name": "users",
+        "columns": {
+          "id": {
+            "name": "id",
+            "type": "serial",
+            "primaryKey": true,
+            "notNull": true
+          },
+          "name": {
+            "name": "name",
+            "type": "varchar(100)"
+          },
+          "email": {
+            "name": "email",
+            "type": "varchar(255)",
+            "notNull": true,
+            "unique": true
+          },
+          "password_hash": {
+            "name": "password_hash",
+            "type": "text",
+            "notNull": true
+          },
+          "role": {
+            "name": "role",
+            "type": "user_role",
+            "notNull": true,
+            "default": "'STUDENT'"
+          },
+          "created_at": {
+            "name": "created_at",
+            "type": "timestamp",
+            "notNull": true,
+            "default": "now()"
+          },
+          "updated_at": {
+            "name": "updated_at",
+            "type": "timestamp",
+            "notNull": true,
+            "default": "now()"
+          },
+          "deleted_at": {
+            "name": "deleted_at",
+            "type": "timestamp"
+          }
+        }
+      }
+    }
+  }
+} 

@@ -1,0 +1,99 @@
+/**
+ * Typography Tokens
+ * 
+ * This file defines the core typography tokens for the Building Bridges design system.
+ * It includes font families, sizes, weights, line heights, and letter spacing.
+ */
+
+:root {
+  /* Font Families */
+  --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Satoshi', var(--font-primary);
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Font Sizes - Using a modular scale of 1.25 */
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-size-4xl: 2.25rem;   /* 36px */
+  --font-size-5xl: 3rem;      /* 48px */
+  --font-size-6xl: 3.75rem;   /* 60px */
+
+  /* Font Weights */
+  --font-weight-thin: 100;
+  --font-weight-extralight: 200;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+
+  /* Line Heights */
+  --line-height-none: 1;
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+
+  /* Letter Spacing */
+  --letter-spacing-tighter: -0.05em;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+
+  /* Paragraph Spacing */
+  --paragraph-spacing-sm: 1rem;
+  --paragraph-spacing-base: 1.5rem;
+  --paragraph-spacing-lg: 2rem;
+
+  /* Responsive Type Scale
+   * These values are used for fluid typography scaling
+   */
+  --fluid-min-width: 320;
+  --fluid-max-width: 1440;
+  --fluid-screen: 100vw;
+  --fluid-bp: calc(
+    (var(--fluid-screen) - var(--fluid-min-width) / 16 * 1rem) /
+    (var(--fluid-max-width) - var(--fluid-min-width))
+  );
+}
+
+/* Responsive Typography - Mobile First */
+@media screen and (min-width: 640px) {
+  :root {
+    --font-size-base: clamp(1rem, 0.95rem + var(--fluid-bp), 1.125rem);
+    --font-size-lg: clamp(1.125rem, 1.075rem + var(--fluid-bp), 1.25rem);
+    --font-size-xl: clamp(1.25rem, 1.2rem + var(--fluid-bp), 1.5rem);
+    --font-size-2xl: clamp(1.5rem, 1.45rem + var(--fluid-bp), 1.875rem);
+    --font-size-3xl: clamp(1.875rem, 1.825rem + var(--fluid-bp), 2.25rem);
+    --font-size-4xl: clamp(2.25rem, 2.2rem + var(--fluid-bp), 3rem);
+  }
+}
+
+/* Dark Mode Adjustments */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Adjust font-smoothing for dark mode */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Print Styles */
+@media print {
+  :root {
+    /* Optimize typography for print */
+    --font-size-base: 12pt;
+    --line-height-normal: 1.4;
+    --paragraph-spacing-base: 1.2rem;
+  }
+} 

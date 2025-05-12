@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { resetPassword } from '@/app/(login)/actions';
+import { useRouter } from 'next/navigation';
 
 type ResetPasswordState = {
   error: string;
@@ -13,83 +14,155 @@ type ResetPasswordState = {
 };
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [step, setStep] = useState<'request' | 'reset'>('request');
   const [formState, setFormState] = useState<ResetPasswordState>({
     error: '',
     success: '',
   });
-  const [isPending, setIsPending] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsPending(true);
+    setIsSubmitting(true);
+    setFormState({ error: '', success: '' });
+    
     const formData = new FormData(e.currentTarget);
-
-    // Call the resetPassword function
-    const result = await resetPassword(formData);
-    setFormState(result);
-
-    // Handle success or transition between steps
-    if (result.success && step === 'request') {
-      setStep('reset'); // Transition to "reset password" step
-    }
-
-    setIsPending(false);
+    
+    resetPassword(formData)
+      .then((result) => {
+        setIsSubmitting(false);
+        
+        if (result.success) {
+          setFormState({ 
+            error: '', 
+            success: result.success // Use the success message directly from the response
+          });
+          
+          // If successful and we have a success message, show it
+          // No redirectTo handling needed as the action doesn't return that property
+          
+          // If we're in reset step, redirect to login after successful password reset
+          if (step === 'reset') {
+            setTimeout(() => {
+              startTransition(() => {
+                router.push('/login');
+              });
+            }, 3000); // Redirect after 3 seconds to allow user to see success message
+          }
+        } else {
+          setFormState({ 
+            error: result.error || 'An error occurred. Please try again.',
+            success: '' 
+          });
+        }
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        setFormState({ 
+          error: 'An unexpected error occurred. Please try again.',
+          success: '' 
+        });
+        console.error('Password reset error:', error);
+      });
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto mt-8">
-      <CardHeader>
-        <CardTitle>Reset Password</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {step === 'request' ? (
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                required
-                placeholder="Enter your email"
-              />
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center">
+            {step === 'request' ? 'Reset Your Password' : 'Enter New Password'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {formState.success && (
+            <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
+              {formState.success}
             </div>
-          ) : (
-            <>
-              <div>
-                <Label htmlFor="token">Reset Token</Label>
-                <Input
-                  id="token"
-                  name="token"
-                  required
-                  placeholder="Enter reset token"
-                />
-              </div>
-              <div>
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input
-                  id="newPassword"
-                  name="newPassword"
-                  type="password"
-                  required
-                  minLength={8}
-                  placeholder="Enter your new password"
-                />
-              </div>
-            </>
           )}
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {step === 'request' ? 'Request Reset' : 'Reset Password'}
-          </Button>
-        </form>
-        {formState.error && (
-          <p className="text-red-500 text-sm mt-2">{formState.error}</p>
-        )}
-        {formState.success && (
-          <p className="text-green-500 text-sm mt-2">{formState.success}</p>
-        )}
-      </CardContent>
-    </Card>
+          
+          {formState.error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+              {formState.error}
+            </div>
+          )}
+          
+          <form onSubmit={handleSubmit}>
+            {step === 'request' ? (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="Enter your email"
+                  />
+                </div>
+                <Button 
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Sending...' : 'Send Reset Link'}
+                </Button>
+                <div className="text-center mt-4">
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={() => startTransition(() => router.push('/login'))}
+                  >
+                    Back to Login
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <input type="hidden" name="token" value="" />
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    name="newPassword"
+                    type="password"
+                    required
+                    placeholder="Enter new password"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    required
+                    placeholder="Confirm new password"
+                  />
+                </div>
+                <Button 
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Updating...' : 'Update Password'}
+                </Button>
+                <div className="text-center mt-4">
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={() => startTransition(() => router.push('/login'))}
+                  >
+                    Back to Login
+                  </Button>
+                </div>
+              </div>
+            )}
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

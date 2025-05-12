@@ -23,7 +23,7 @@ type ActionState = {
 
 export function InviteTeamMember() {
   const { user } = useUser();
-  const isOwner = user?.role === 'owner';
+  const isOwner = user?.role === 'ADMIN';
   const [inviteState, inviteAction, isInvitePending] = useActionState<
     ActionState,
     FormData

@@ -124,4 +124,57 @@ While this template is intentionally minimal and to be used as a learning resour
 - https://achromatic.dev
 - https://shipfa.st
 - https://makerkit.dev
-# BuildingBridges
+
+# Building Bridges Website
+
+## Environment Setup
+
+This project uses environment variables for configuration. We provide a setup script to help you get started.
+
+### Initial Setup
+
+1. Run the environment setup script:
+   ```bash
+   ./scripts/setup-env.sh
+   ```
+   This will create:
+   - `.env.development` for local development
+   - `.env.test` for testing
+   - `.env.production.template` as a template for production settings
+
+2. Review and update the created files with your specific configuration:
+   - Database credentials
+   - Authentication settings
+   - API keys
+   - Feature flags
+
+### Environment Files
+
+- `.env.development`: Used for local development
+- `.env.test`: Used for running tests
+- `.env.production`: Used in production (create from `.env.production.template`)
+- `.env.*.template`: Template files that can be committed to version control
+
+⚠️ Important Notes:
+- Never commit actual environment files (`.env.*`) to version control
+- Keep sensitive information secure
+- Regularly update secrets and API keys
+- Back up your production environment configuration securely
+
+### Manual Configuration
+
+If you prefer to set up environment variables manually:
+
+1. Copy the appropriate template file:
+   ```bash
+   cp .env.production.template .env.development
+   ```
+
+2. Update the values in your new environment file:
+   ```env
+   DATABASE_URL=your_database_url
+   NEXTAUTH_SECRET=your_generated_secret
+   # ... other variables
+   ```
+
+3. Ensure all required variables are set before running the application

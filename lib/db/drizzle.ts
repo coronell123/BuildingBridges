@@ -2,30 +2,39 @@ import "dotenv/config";
 import { PostgresJsDatabase, drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
+import dbConfig from "./config";
 
-if (!process.env.POSTGRES_URL) {
-  throw new Error('POSTGRES_URL environment variable is not set');
-}
+// Log connection information
+dbConfig.logConnectionInfo();
 
-const connectionString = process.env.POSTGRES_URL;
+// Set up connection event handlers
+let connectCount = 0;
+const onnotice = (message: postgres.Notice) => {
+  console.log("Postgres notice:", message.message);
+};
 
-// Create postgres connection
-const client = postgres(connectionString, {
-  prepare: false,
-  connect_timeout: 30, // increased to 30 seconds
-  idle_timeout: 30,
-  max: 3, // reduced pool size
+// Create the Postgres.js client with improved error handling
+export const client = postgres(dbConfig.getConnectionString(), {
+  ...dbConfig.getConnectionOptions(),
+  onnotice, // Log notices
+  onparameter: (key: string, value: string) => {
+    if (key === 'client_encoding' || key === 'TimeZone') {
+      console.log(`Postgres parameter ${key} = ${value}`);
+    }
+  },
+  debug: process.env.DB_DEBUG === 'true', // Enable debugging if DB_DEBUG=true
+  transform: {
+    undefined: null, // Transform undefined values to NULL
+  },
   connection: {
-    timezone: 'UTC'
-  }
+    application_name: 'building-bridges-website' // Add application name for monitoring
+  },
 });
 
-const drizzleClient = drizzle(client, { schema });
+// Create and export the Drizzle ORM instance
+export const db: PostgresJsDatabase<typeof schema> = drizzle(client, { schema });
 
-declare global {
-  var database: PostgresJsDatabase<typeof schema> | undefined;
-}
+console.log("Drizzle client initialized successfully");
 
-export const db = global.database || drizzleClient;
-export { client }; // Export for migrations
-if (process.env.NODE_ENV !== "production") global.database = db;
+// Export database schema for migrations and seeds
+export { schema };
