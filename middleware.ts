@@ -1,57 +1,100 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { signToken, verifyToken } from '@/lib/auth/session';
+import { NextRequest, NextResponse } from 'next/server';
+import { getSession } from './lib/auth/session';
 
-const protectedRoutes = '/dashboard';
-// Explicitly exclude the mentors page and mentors-redirect from protection
-const publicPaths = ['/mentors', '/dashboard/mentors', '/dashboard/mentors-redirect'];
+// Define protected paths by role
+const adminOnlyPaths = [
+  '/dashboard/admin',
+  '/dashboard/settings/users'
+];
+
+const mentorOnlyPaths = [
+  '/dashboard/mentor'
+];
+
+const studentOnlyPaths = [
+  '/dashboard/student'
+];
+
+// Public paths that don't require authentication
+const publicPaths = [
+  '/',
+  '/sign-in',
+  '/sign-up',
+  '/dashboard/mentors',
+  '/mentors',
+  '/contact',
+  '/about',
+  '/api/webhooks/stripe',
+  '/onboarding',
+  '/design-system'
+];
+
+const isPublicPath = (path: string) => {
+  return publicPaths.some(publicPath => 
+    path === publicPath || 
+    path.startsWith(`${publicPath}/`) ||
+    path.match(/\.(jpg|jpeg|png|webp|svg|ico|css|js)$/)
+  );
+};
+
+const isAdminOnlyPath = (path: string) => {
+  return adminOnlyPaths.some(adminPath => 
+    path === adminPath || 
+    path.startsWith(`${adminPath}/`)
+  );
+};
+
+const isMentorOnlyPath = (path: string) => {
+  return mentorOnlyPaths.some(mentorPath => 
+    path === mentorPath || 
+    path.startsWith(`${mentorPath}/`)
+  );
+};
+
+const isStudentOnlyPath = (path: string) => {
+  return studentOnlyPaths.some(studentPath => 
+    path === studentPath || 
+    path.startsWith(`${studentPath}/`)
+  );
+};
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const sessionCookie = request.cookies.get('session');
   
-  // Check if the current path is in the public paths list
-  const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
-  // Only consider it a protected route if it's not a public path
-  const isProtectedRoute = pathname.startsWith(protectedRoutes) && !isPublicPath;
-
-  // Direct server-side redirect for mentors paths
+  // Direct server-side redirect for mentors path
   if (pathname === '/dashboard/mentors' || pathname === '/dashboard/mentors/') {
     return NextResponse.redirect(new URL('/mentors', request.url));
   }
 
-  if (isProtectedRoute && !sessionCookie) {
+  // Allow public paths
+  if (isPublicPath(pathname)) {
+    return NextResponse.next();
+  }
+  
+  // For all other paths, check authentication
+  const session = await getSession();
+  
+  if (!session) {
+    // Redirect to sign-in if not authenticated
     return NextResponse.redirect(new URL('/sign-in', request.url));
   }
-
-  let res = NextResponse.next();
-
-  if (sessionCookie) {
-    try {
-      const parsed = await verifyToken(sessionCookie.value);
-      const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-      res.cookies.set({
-        name: 'session',
-        value: await signToken({
-          ...parsed,
-          expires: expiresInOneDay.toISOString(),
-        }),
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
-        expires: expiresInOneDay,
-      });
-    } catch (error) {
-      console.error('Error updating session:', error);
-      res.cookies.delete('session');
-      if (isProtectedRoute) {
-        return NextResponse.redirect(new URL('/sign-in', request.url));
-      }
-    }
+  
+  const userRole = session.user.role || 'STUDENT';
+  
+  // Role-based access control
+  if (isAdminOnlyPath(pathname) && userRole !== 'ADMIN') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
-
-  return res;
+  
+  if (isMentorOnlyPath(pathname) && userRole !== 'MENTOR') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+  
+  if (isStudentOnlyPath(pathname) && userRole !== 'STUDENT') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+  
+  return NextResponse.next();
 }
 
 export const config = {

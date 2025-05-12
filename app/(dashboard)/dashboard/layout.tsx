@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Users, Settings, Shield, Activity, Menu, UserCircle } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;

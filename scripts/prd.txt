@@ -1,0 +1,51 @@
+# Building Bridges Authentication System and User Roles
+
+## Overview
+The Building Bridges website needs an improved authentication system with user role management. The system should support three distinct user roles (Admin, Student, and Mentor), implement a more robust sign-up and sign-in process, and provide role-specific dashboard experiences.
+
+## Core Requirements
+
+### User Roles
+- Implement three distinct user roles: ADMIN, STUDENT, and MENTOR
+- Store user role information in the database
+- Include role information in authentication sessions
+- Set STUDENT as the default role for new sign-ups
+
+### Authentication Improvements
+- Enhance the sign-up form to include role selection
+- Ensure proper validation for all form fields
+- Improve error handling throughout the authentication process
+- Make the authentication flow visually appealing and user-friendly
+
+### Database Updates
+- Modify the database schema to include proper role enumeration
+- Create a safe migration path for existing users
+- Ensure data integrity during schema changes
+- Optimize role-based database queries
+
+### Role-Based Dashboards
+- Implement conditional rendering based on user role
+- Create basic role-specific dashboard views
+- Admin dashboard should include user management capabilities
+- Mentor dashboard should focus on mentorship activities
+- Student dashboard should emphasize learning and workshop access
+
+### Access Control
+- Implement middleware-based access control for protected routes
+- Restrict certain routes based on user roles
+- Provide clear feedback for unauthorized access attempts
+- Ensure security is implemented on both client and server sides
+
+## Technical Constraints
+- Use the existing Next.js and Drizzle ORM setup
+- Maintain compatibility with current database structure
+- Follow existing design patterns and component styles
+- Keep changes minimal while achieving requirements
+- Focus on simple, reliable implementations
+
+## Success Criteria
+- Users can sign up and select their role
+- Authentication stores and utilizes role information
+- Dashboard experience changes based on user role
+- Protected routes enforce proper access control
+- Solution is robust, maintainable, and user-friendly 

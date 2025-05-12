@@ -49,8 +49,12 @@ async function seed() {
     .values([
       {
         email: email,
+        name: 'Test User',
         passwordHash: passwordHash,
-        role: "owner",
+        role: 'ADMIN',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
       },
     ])
     .returning();

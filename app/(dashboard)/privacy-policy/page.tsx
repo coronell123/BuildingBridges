@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
         <CardContent className="p-6 prose prose-purple max-w-none">
           <h2 className="text-2xl font-semibold text-[#8c52ff] mb-4">1. Verantwortliche Stelle</h2>
           <p>
-            Betreiber der Living-Plattform im Rahmen des Projekts „Building Bridges" sind die Freie 
+            Betreiber der Living-Plattform im Rahmen des Projekts "Building Bridges" sind die Freie 
             Universität Berlin, Stiftung SPI und Universität Duisburg-Essen.
           </p>
 
@@ -81,11 +81,11 @@ export default function PrivacyPolicyPage() {
       </Card>
 
       <div className="text-center mt-12">
-        <Button asChild className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full px-8 py-4 inline-flex items-center justify-center">
-          <Link href="/sign-up">
+        <Link href="/sign-up">
+          <Button className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full px-8 py-4 inline-flex items-center justify-center">
             Jetzt Teilnehmen
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
     </div>
   );

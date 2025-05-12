@@ -15,6 +15,7 @@ import {
   type NewActivityLog,
   ActivityType,
   invitations,
+  roleEnum,
 } from '@/lib/db/schema';
 import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
@@ -89,20 +90,32 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     return createCheckoutSession({ team: foundTeam, priceId });
   }
 
-  redirect('/dashboard');
+  // Return success instead of redirecting
+  return { success: true, redirectTo: '/dashboard' };
 });
 
 const signUpSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters long")
+    .max(100, "Password must be less than 100 characters")
+    .refine(
+      (password) => /[A-Z]/.test(password),
+      "Password must contain at least one uppercase letter"
+    )
+    .refine(
+      (password) => /[0-9]/.test(password),
+      "Password must contain at least one number"
+    ),
+  role: z.enum(['ADMIN', 'STUDENT', 'MENTOR']).default('STUDENT'),
   inviteId: z.string().optional(),
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   try {
-    const { email, password, inviteId } = data;
+    const { email, password, inviteId, role } = data;
 
-    // Check for existing user
+    // Check for existing user with detailed error message
     const existingUser = await db
       .select()
       .from(users)
@@ -110,20 +123,32 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       .limit(1);
 
     if (existingUser.length > 0) {
-      return { error: 'An account with this email already exists.' };
+      console.log(`Sign-up attempt with existing email: ${email}`);
+      return { error: 'An account with this email already exists. Please sign in instead.' };
     }
 
+    // Validate password strength for better security
+    if (password.length < 8) {
+      return { error: 'Password must be at least 8 characters long.' };
+    }
+
+    if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      return { error: 'Password must contain at least one uppercase letter and one number.' };
+    }
+
+    // Proceed with user creation with additional error handling
     const passwordHash = await hashPassword(password);
     const newUser: NewUser = {
       email,
       passwordHash,
-      role: 'owner',
+      role,
     };
 
     // Wrap database operations in a try-catch
     const [createdUser] = await db.insert(users).values(newUser).returning();
     if (!createdUser) {
-      return { error: 'Failed to create user. Please try again.' };
+      console.error('Failed to create user record after validation checks passed');
+      return { error: 'Failed to create user account. Please try again later.' };
     }
 
     let teamId: number;
@@ -131,7 +156,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     let createdTeam: typeof teams.$inferSelect | null = null;
 
     if (inviteId) {
-      // Check if there's a valid invitation
+      // Enhanced invitation validation with specific error messages
       const [invitation] = await db
         .select()
         .from(invitations)
@@ -160,19 +185,35 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
           .from(teams)
           .where(eq(teams.id, teamId))
           .limit(1);
+          
+        if (!createdTeam) {
+          console.error(`Team not found for invitation: ${invitation.id}, teamId: ${teamId}`);
+          return { error: 'Failed to join team. Please contact support.' };
+        }
       } else {
-        return { error: 'Invalid or expired invitation.' };
+        console.warn(`Invalid invitation attempt: ${inviteId}, email: ${email}`);
+        return { error: 'The invitation link is invalid or has expired. Please request a new invitation.' };
       }
     } else {
-      // Create a new team if there's no invitation
+      // Create a new team with additional validation
       const newTeam: NewTeam = {
         name: `${email}'s Team`,
       };
 
-      [createdTeam] = await db.insert(teams).values(newTeam).returning();
+      try {
+        [createdTeam] = await db.insert(teams).values(newTeam).returning();
+      } catch (error) {
+        console.error('Team creation error:', error);
+        // Cleanup the created user since team creation failed
+        await db.delete(users).where(eq(users.id, createdUser.id));
+        return { error: 'Failed to set up your account. Please try again later.' };
+      }
 
       if (!createdTeam) {
-        return { error: 'Failed to create team. Please try again.' };
+        console.error('Team created but not returned properly');
+        // Cleanup the created user
+        await db.delete(users).where(eq(users.id, createdUser.id));
+        return { error: 'Failed to set up your team. Please try again later.' };
       }
 
       teamId = createdTeam.id;
@@ -181,17 +222,25 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
     }
 
+    // Handle team membership creation with error handling
     const newTeamMember: NewTeamMember = {
       userId: createdUser.id,
       teamId: teamId,
       role: userRole,
     };
 
-    await Promise.all([
-      db.insert(teamMembers).values(newTeamMember),
-      logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
-      setSession(createdUser),
-    ]);
+    try {
+      await Promise.all([
+        db.insert(teamMembers).values(newTeamMember),
+        logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
+        setSession(createdUser),
+      ]);
+    } catch (error) {
+      console.error('Failed to complete signup process:', error);
+      return { error: 'Your account was created but we encountered an issue setting up your team. Please contact support.' };
+    }
+
+    console.log(`User signup successful: ${email}, role: ${role}, team: ${teamId}`);
 
     const redirectTo = formData.get('redirect') as string | null;
     if (redirectTo === 'checkout') {
@@ -199,11 +248,22 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       return createCheckoutSession({ team: createdTeam, priceId });
     }
 
-    redirect('/onboarding');
+    // Return success instead of redirecting
+    return { success: true, redirectTo: '/onboarding' };
   } catch (error) {
+    // Enhanced error logging with details
     console.error('Sign-up error:', error);
+    
+    // Determine if it's a database connection issue
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    if (errorMessage.includes('connection') || errorMessage.includes('ECONNREFUSED')) {
+      return { 
+        error: 'Database connection error. Please try again in a few moments.' 
+      };
+    }
+    
     return { 
-      error: 'Connection error. Please try again in a few moments.' 
+      error: 'An unexpected error occurred during sign-up. Please try again later or contact support if the issue persists.' 
     };
   }
 });

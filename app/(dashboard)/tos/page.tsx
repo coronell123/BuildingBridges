@@ -68,11 +68,11 @@ export default function TermsOfServicePage() {
       </Card>
 
       <div className="text-center mt-12">
-        <Button asChild className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full px-8 py-4 inline-flex items-center justify-center">
-          <Link href="/sign-up">
+        <Link href="/sign-up">
+          <Button className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full px-8 py-4 inline-flex items-center justify-center">
             Jetzt Teilnehmen
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
     </div>
   );

@@ -25,37 +25,37 @@ export default function MentorsPage() {
     mentorExperience: '',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    try {
-      const result = await saveMentorData(formData);
-      
-      if (result.success) {
-        alert('Anmeldung erfolgreich! Wir werden uns in Kürze bei dir melden.');
-        setFormData({
-          name: '',
-          email: '',
-          pronouns: '',
-          age: '',
-          studentStatus: '',
-          fieldOfStudy: '',
-          semester: '',
-          university: '',
-          bipocIdentity: '',
-          additionalCategories: '',
-          hasCapacity: '',
-          intersectionalityKnowledge: '',
-          mentorExperience: '',
-        });
-      } else {
-        console.error('Submission error:', result.error);
-        alert('Ein Fehler ist aufgetreten. Bitte versuche es später erneut.');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
-    }
+    saveMentorData(formData)
+      .then(result => {
+        if (result.success) {
+          alert('Anmeldung erfolgreich! Wir werden uns in Kürze bei dir melden.');
+          setFormData({
+            name: '',
+            email: '',
+            pronouns: '',
+            age: '',
+            studentStatus: '',
+            fieldOfStudy: '',
+            semester: '',
+            university: '',
+            bipocIdentity: '',
+            additionalCategories: '',
+            hasCapacity: '',
+            intersectionalityKnowledge: '',
+            mentorExperience: '',
+          });
+        } else {
+          console.error('Submission error:', result.error);
+          alert('Ein Fehler ist aufgetreten. Bitte versuche es später erneut.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
+      });
   };
 
   return (

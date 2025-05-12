@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import { fontFamily } from 'tailwindcss/defaultTheme';
 
 const config: Config = {
   darkMode: ['class'],
@@ -7,7 +8,6 @@ const config: Config = {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
-    './lib/**/*.{ts,tsx}',
   ],
   theme: {
     container: {
@@ -18,36 +18,86 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        primary: ['var(--font-inter)', ...fontFamily.sans],
+        mono: ['var(--font-jetbrains)', ...fontFamily.mono],
+      },
       colors: {
-        primary: "hsl(var(--primary))",
-        'primary-light': "hsl(var(--primary-light))",
-        'primary-dark': "hsl(var(--primary-dark))",
-        'secondary-green': "hsl(var(--secondary-green))",
-        'secondary-teal': "hsl(var(--secondary-teal))",
-        'accent-red': "hsl(var(--accent-red))",
-        'accent-yellow': "hsl(var(--accent-yellow))",
-        'text-primary': "hsl(var(--text-primary))",
-        'text-secondary': "hsl(var(--text-secondary))",
-        'text-muted': "hsl(var(--text-muted))",
-        'text-light': "hsl(var(--text-light))",
-        'background-primary': "hsl(var(--background-primary))",
-        'background-secondary': "hsl(var(--background-secondary))",
-        'background-hover': "hsl(var(--background-hover))",
-        'background-dark': "hsl(var(--background-dark))",
-        border: "hsl(var(--border-default))",
-        'border-light': "hsl(var(--border-light))",
-        'border-dark': "hsl(var(--border-dark))",
-        background: "hsl(var(--background-primary))",
-        foreground: "hsl(var(--text-primary))",
+        // Brand Colors
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          light: "hsl(var(--primary-light))",
+          dark: "hsl(var(--primary-dark))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        
+        // Background Colors
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        
+        // Component Colors
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        
+        // Secondary & Accent Colors
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        
+        // Status Colors
+        success: "hsl(var(--success))",
+        info: "hsl(var(--info))",
+        warning: "hsl(var(--warning))",
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        
+        // UI Colors
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
       },
       borderRadius: {
         small: 'var(--radius-small)',
         medium: 'var(--radius-medium)',
         large: 'var(--radius-large)',
         round: 'var(--radius-round)',
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
       maxWidth: {
         'content': '1200px',
+      },
+      keyframes: {
+        'accordion-down': {
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
+        },
+        'accordion-up': {
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
+        },
+      },
+      animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
       },
     },
   },
@@ -57,4 +107,5 @@ const config: Config = {
     require('@tailwindcss/typography'),
   ],
 };
+
 export default config;

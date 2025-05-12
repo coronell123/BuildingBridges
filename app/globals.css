@@ -4,106 +4,145 @@
 
 @layer base {
   :root {
-    /* Primary Colors */
-    --primary: 262 100% 66%; /* #8C52FF - Lila */
-    --primary-light: 262 100% 75%; /* #A37EFF */
-    --primary-dark: 262 57% 55%; /* #6B38DB */
-    
-    /* Secondary Colors */
-    --secondary-green: 159 83% 39%; /* #10B981 */
-    --secondary-teal: 187 94% 43%; /* #06B6D4 */
-    
-    /* Accent Colors */
-    --accent-red: 0 84% 60%; /* #EF4444 */
-    --accent-yellow: 35 92% 50%; /* #F59E0B */
-    
-    /* Text Colors */
-    --text-primary: 222 47% 11%; /* #111827 */
-    --text-secondary: 220 9% 35%; /* #4B5563 */
-    --text-muted: 216 10% 47%; /* #6B7280 */
-    --text-light: 0 0% 100%; /* #FFFFFF */
-    
+    /* Brand Colors */
+    --primary: 262 100% 66%;
+    --primary-light: 262 100% 75%;
+    --primary-dark: 262 57% 55%;
+    --primary-hover: 262 100% 60%;
+    --primary-active: 262 100% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary Colors with States */
+    --secondary: 159 83% 39%;
+    --secondary-light: 159 83% 49%;
+    --secondary-dark: 159 83% 29%;
+    --secondary-hover: 159 83% 34%;
+    --secondary-active: 159 83% 32%;
+    --secondary-foreground: 0 0% 100%;
+
     /* Background Colors */
-    --background-primary: 0 0% 100%; /* #FFFFFF */
-    --background-secondary: 210 20% 98%; /* #F9FAFB */
-    --background-hover: 220 14% 96%; /* #F3F4F6 */
-    --background-dark: 222 47% 11%; /* #111827 */
-    
-    /* Border Colors */
-    --border-default: 220 13% 91%; /* #E5E7EB */
-    --border-light: 220 14% 96%; /* #F3F4F6 */
-    --border-dark: 216 13% 84%; /* #D1D5DB */
-    
-    /* Misc Colors (for backward compatibility) */
-    --foreground: var(--text-primary);
-    --card: var(--background-primary);
-    --card-foreground: var(--text-primary);
-    --popover: var(--background-primary);
-    --popover-foreground: var(--text-primary);
-    --secondary: var(--secondary-teal);
-    --secondary-foreground: var(--text-light);
-    --muted: var(--background-secondary);
-    --muted-foreground: var(--text-muted);
-    --accent: var(--primary-light);
-    --accent-foreground: var(--text-light);
-    --destructive: var(--accent-red);
-    --destructive-foreground: var(--text-light);
-    --border: var(--border-default);
-    --input: var(--border-default);
-    --ring: var(--primary);
-    
+    --background: 0 0% 100%;
+    --background-subtle: 210 40% 98%;
+    --background-muted: 210 40% 96.1%;
+    --foreground: 222.2 84% 4.9%;
+    --foreground-muted: 215.4 16.3% 46.9%;
+
+    /* Component Colors */
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --card-hover: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Accent Colors */
+    --accent: 262 100% 75%;
+    --accent-light: 262 100% 85%;
+    --accent-dark: 262 100% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Status Colors - With Subtle Backgrounds */
+    --success: 159 83% 39%;
+    --success-light: 159 83% 96%;
+    --success-foreground: 159 83% 20%;
+    --info: 187 94% 43%;
+    --info-light: 187 94% 96%;
+    --info-foreground: 187 94% 20%;
+    --warning: 35 92% 50%;
+    --warning-light: 35 92% 96%;
+    --warning-foreground: 35 92% 20%;
+    --destructive: 0 84% 60%;
+    --destructive-light: 0 84% 96%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* UI Colors */
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --border: 214.3 31.8% 91.4%;
+    --border-hover: 214.3 31.8% 85%;
+    --input: 214.3 31.8% 91.4%;
+    --input-hover: 214.3 31.8% 85%;
+    --input-focus: 262 100% 66%;
+    --ring: 262 100% 66%;
+    --ring-hover: 262 100% 60%;
+
+    /* Focus & Selection */
+    --focus-ring: 262 100% 66%;
+    --selection-background: 262 100% 90%;
+    --selection-foreground: 262 100% 20%;
+
     /* Radius */
-    --radius-small: 4px;
-    --radius-medium: 8px;
-    --radius-large: 12px;
-    --radius-round: 999px;
-    --radius: var(--radius-medium);
+    --radius-sm: 0.25rem;
+    --radius: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
   }
 
   .dark {
-    /* Primary Colors (slightly adjusted for dark mode) */
-    --primary: 262 100% 75%; /* #A37EFF - Lighter in dark mode */
-    --primary-light: 262 100% 85%; /* #BFA5FF */
-    --primary-dark: 262 57% 45%; /* #5A30B9 */
-    
-    /* Secondary Colors (adjusted for dark mode) */
-    --secondary-green: 159 70% 35%; /* #109170 */
-    --secondary-teal: 187 75% 40%; /* #0593AB */
-    
-    /* Text Colors (inverted) */
-    --text-primary: 0 0% 98%; /* #FAFAFA */
-    --text-secondary: 0 0% 80%; /* #CCCCCC */
-    --text-muted: 0 0% 65%; /* #A6A6A6 */
-    --text-light: 222 47% 11%; /* #111827 */
-    
-    /* Background Colors (inverted) */
-    --background-primary: 222 47% 11%; /* #111827 */
-    --background-secondary: 222 47% 14%; /* #1F2937 */
-    --background-hover: 217 33% 17%; /* #2D3748 */
-    --background-dark: 0 0% 100%; /* #FFFFFF */
-    
-    /* Border Colors (darker) */
-    --border-default: 215 28% 17%; /* #2D3748 */
-    --border-light: 217 33% 20%; /* #374151 */
-    --border-dark: 215 25% 27%; /* #4A5568 */
-    
-    /* Misc Colors (for backward compatibility) */
-    --foreground: var(--text-primary);
-    --card: var(--background-secondary);
-    --card-foreground: var(--text-primary);
-    --popover: var(--background-secondary);
-    --popover-foreground: var(--text-primary);
-    --secondary: var(--secondary-teal);
-    --secondary-foreground: var(--text-light);
-    --muted: var(--background-secondary);
-    --muted-foreground: var(--text-muted);
-    --accent: var(--primary-light);
-    --accent-foreground: var(--text-light);
-    --destructive: var(--accent-red);
-    --destructive-foreground: var(--text-primary);
-    --border: var(--border-default);
-    --input: var(--border-default);
-    --ring: var(--primary-light);
+    /* Brand Colors */
+    --primary: 262 100% 75%;
+    --primary-light: 262 100% 85%;
+    --primary-dark: 262 57% 45%;
+    --primary-hover: 262 100% 70%;
+    --primary-active: 262 100% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary Colors with States */
+    --secondary: 159 70% 35%;
+    --secondary-light: 159 70% 45%;
+    --secondary-dark: 159 70% 25%;
+    --secondary-hover: 159 70% 30%;
+    --secondary-active: 159 70% 28%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Background Colors */
+    --background: 222.2 84% 4.9%;
+    --background-subtle: 223 84% 8%;
+    --background-muted: 223 84% 10%;
+    --foreground: 210 40% 98%;
+    --foreground-muted: 215 20.2% 65.1%;
+
+    /* Component Colors */
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --card-hover: 223 84% 8%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Accent Colors */
+    --accent: 262 100% 85%;
+    --accent-light: 262 100% 90%;
+    --accent-dark: 262 100% 75%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Status Colors - With Subtle Backgrounds */
+    --success: 159 70% 35%;
+    --success-light: 159 70% 15%;
+    --success-foreground: 159 70% 90%;
+    --info: 187 75% 40%;
+    --info-light: 187 75% 15%;
+    --info-foreground: 187 75% 90%;
+    --warning: 35 85% 45%;
+    --warning-light: 35 85% 15%;
+    --warning-foreground: 35 85% 90%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-light: 0 62.8% 15%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* UI Colors */
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --border: 217.2 32.6% 17.5%;
+    --border-hover: 217.2 32.6% 25%;
+    --input: 217.2 32.6% 17.5%;
+    --input-hover: 217.2 32.6% 25%;
+    --input-focus: 262 100% 75%;
+    --ring: 262 100% 75%;
+    --ring-hover: 262 100% 70%;
+
+    /* Focus & Selection */
+    --focus-ring: 262 100% 75%;
+    --selection-background: 262 100% 20%;
+    --selection-foreground: 262 100% 90%;
   }
 }
 
@@ -111,43 +150,81 @@
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-background text-foreground font-primary;
   }
-  
-  h1 {
-    @apply text-4xl font-bold leading-tight;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-primary font-semibold tracking-tight;
   }
-  
-  h2 {
-    @apply text-3xl font-bold leading-tight;
+  code {
+    @apply font-mono;
   }
-  
-  h3 {
-    @apply text-2xl font-semibold leading-tight;
+}
+
+/* Custom utility classes */
+.content-grid {
+  @apply max-w-content mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.link-hover {
+  @apply transition-colors duration-200 hover:text-primary/80;
+}
+
+.focus-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+}
+
+/* Animation classes */
+@keyframes fade-in {
+  from {
+    opacity: 0;
   }
-  
-  h4 {
-    @apply text-xl font-semibold leading-tight;
+  to {
+    opacity: 1;
   }
-  
-  h5 {
-    @apply text-lg font-semibold leading-tight;
+}
+
+@keyframes slide-in-from-top {
+  from {
+    transform: translateY(-1rem);
+    opacity: 0;
   }
-  
-  h6 {
-    @apply text-base font-semibold leading-tight;
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
-  
-  p {
-    @apply text-base font-normal leading-normal;
+}
+
+@keyframes slide-in-from-bottom {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
   }
-  
-  small {
-    @apply text-sm font-normal leading-normal;
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
+}
+
+.animate-fade-in {
+  animation: fade-in 300ms ease-out forwards;
+}
+
+.animate-slide-in-from-top {
+  animation: slide-in-from-top 300ms ease-out forwards;
+}
+
+.animate-slide-in-from-bottom {
+  animation: slide-in-from-bottom 300ms ease-out forwards;
+}
+
+/* Responsive text utilities */
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
 }
 
 /* Components based on the design system */
@@ -157,31 +234,31 @@
   }
   
   .btn {
-    @apply inline-flex items-center justify-center rounded-medium px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center rounded-md px-6 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
   }
   
   .btn-primary {
-    @apply btn bg-primary text-white hover:bg-primary-dark;
+    @apply btn bg-primary text-primary-foreground hover:bg-primary-dark;
   }
   
   .btn-secondary {
-    @apply btn bg-secondary-green text-white hover:bg-opacity-90;
+    @apply btn bg-secondary text-secondary-foreground hover:bg-secondary/90;
   }
   
   .btn-outline {
-    @apply btn bg-transparent border border-border hover:bg-background-hover text-text-primary;
+    @apply btn bg-background border border-input hover:bg-accent hover:text-accent-foreground;
   }
   
   .btn-ghost {
-    @apply btn bg-transparent hover:bg-background-hover text-text-primary;
+    @apply btn bg-transparent hover:bg-accent hover:text-accent-foreground;
   }
   
   .card {
-    @apply rounded-medium border border-border bg-background-primary p-6 shadow-sm;
+    @apply rounded-md border border-border bg-card p-6 shadow-sm;
   }
   
   .input {
-    @apply flex h-10 w-full rounded-medium border border-border bg-background-primary px-3 py-2 text-base ring-offset-background placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
   }
   
   .link {

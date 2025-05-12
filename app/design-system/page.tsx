@@ -1,6 +1,7 @@
 import React from 'react';
 import { colors, typography } from '@/lib/design-system/config';
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/lib/design-system/components';
+import { BasicInteractiveCard, CustomInteractiveCard } from './components/InteractiveComponents';
 
 /**
  * Design System Demonstration Page
@@ -354,37 +355,14 @@ export default function DesignSystemPage() {
                             <Button size="sm" variant="secondary">Action</Button>
                           </CardFooter>
                         </Card>
-
-                        <Card variant="outline">
-                          <CardHeader>
-                            <CardTitle>Outline Card</CardTitle>
-                            <CardDescription>This card has a transparent background</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <p>This card has a transparent background with just a border outline.</p>
-                          </CardContent>
-                          <CardFooter>
-                            <Button size="sm" variant="outline">Action</Button>
-                          </CardFooter>
-                        </Card>
                       </div>
                     </div>
                     
                     <div className="space-y-4">
                       <h4 className="text-lg font-semibold">Special Card Variants</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <Card variant="interactive" onClick={() => alert('Card clicked!')}>
-                          <CardHeader>
-                            <CardTitle>Interactive Card</CardTitle>
-                            <CardDescription>This entire card is clickable</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <p>Hover over me to see the interactive effect. I'm fully clickable!</p>
-                          </CardContent>
-                          <CardFooter>
-                            <span className="text-sm text-text-muted">Click to interact</span>
-                          </CardFooter>
-                        </Card>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <BasicInteractiveCard />
+                        <CustomInteractiveCard />
 
                         <Card variant="glass" className="bg-primary/30">
                           <CardHeader>
