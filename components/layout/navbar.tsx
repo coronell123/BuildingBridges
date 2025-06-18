@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/lib/design-system/components';
+import { Button } from '@/components/ui/button';
 import { Menu, X, User, Settings, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { NavigationLinks } from './navigation-links';
-import { useUser } from '@/lib/auth/index';
+import { useSession, signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   DropdownMenu,
@@ -17,7 +16,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { signOut } from '@/app/(login)/actions';
 
 const navItems = [
   { name: 'Vision', href: '/vision' },
@@ -28,47 +26,33 @@ const navItems = [
 ];
 
 export function Navbar() {
-  const { user } = useUser();
+  const { data: session } = useSession();
+  const user = session?.user;
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Handle scroll effect for navbar
   useEffect(() => {
     const handleScroll = () => {
-      const offset = window.scrollY;
-      if (offset > 50) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      setScrolled(window.scrollY > 50);
     };
 
     window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
-      <motion.div 
-        className="absolute inset-0 bg-[url('/abstract.svg')] bg-center bg-no-repeat bg-cover"
-        initial={{ opacity: 0.5 }}
-        animate={{ opacity: scrolled ? 0.3 : 0.5 }}
-        transition={{ duration: 0.3 }}
-      />
       <motion.nav 
-        className="relative border-b border-gray-200"
+        className="relative border-b border-gray-200/80"
         animate={{
-          backgroundColor: scrolled ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.8)',
-          backdropFilter: scrolled ? 'blur(10px)' : 'blur(5px)',
+          backgroundColor: scrolled ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.5)',
+          backdropFilter: scrolled ? 'blur(12px)' : 'blur(8px)',
           boxShadow: scrolled ? '0 4px 6px -1px rgba(0, 0, 0, 0.05)' : 'none'
         }}
         transition={{ duration: 0.3 }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            {/* Logo - always visible */}
             <motion.div 
               className="flex-shrink-0 flex items-center"
               initial={{ opacity: 0, y: -20 }}
@@ -79,58 +63,50 @@ export function Navbar() {
                 <Image
                   src="/logo_round.svg"
                   alt="Building Bridges Logo"
-                  width={40}
-                  height={40}
-                  className="w-auto h-8"
+                  width={32}
+                  height={32}
                 />
-                <span className="text-xl font-bold">Building Bridges</span>
+                <span className="text-xl font-semibold text-gray-800">Building Bridges</span>
               </Link>
             </motion.div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-6">
+            <div className="hidden md:flex items-center space-x-2">
               {navItems.map((item, index) => (
                 <motion.div
                   key={item.name}
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
+                  transition={{ duration: 0.5, delay: 0.1 + index * 0.05 }}
                 >
-                  <Link href={item.href}>
-                    <Button
-                      variant="default"
-                      className="px-6"
-                    >
-                      {item.name}
-                    </Button>
-                  </Link>
+                  <Button asChild variant="ghost">
+                    <Link href={item.href}>{item.name}</Link>
+                  </Button>
                 </motion.div>
               ))}
             </div>
 
-            {/* Auth Buttons */}
             <motion.div 
               className="flex items-center space-x-4"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
             >
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="default">Dashboard</Button>
+                    <Button variant="outline">Dashboard</Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuLabel>{user.name || 'My Account'}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                      <Link href="/dashboard" className="block">
+                      <Link href="/dashboard">
                         <DropdownMenuItem className="cursor-pointer">
                           <User className="mr-2 h-4 w-4" />
                           <span>Dashboard</span>
                         </DropdownMenuItem>
                       </Link>
-                      <Link href="/dashboard/general" className="block">
+                      <Link href="/dashboard/settings">
                         <DropdownMenuItem className="cursor-pointer">
                           <Settings className="mr-2 h-4 w-4" />
                           <span>Settings</span>
@@ -140,10 +116,7 @@ export function Navbar() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       className="cursor-pointer"
-                      onClick={async () => {
-                        await signOut();
-                        window.location.href = '/';
-                      }}
+                      onSelect={() => signOut({ callbackUrl: '/' })}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
@@ -151,66 +124,58 @@ export function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <div className="flex items-center gap-4">
-                  <Link href="/sign-in">
-                    <Button variant="outline" size="md">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/sign-up">
-                    <Button variant="default" size="md">
-                      Sign Up
-                    </Button>
-                  </Link>
+                <div className="hidden md:flex items-center space-x-2">
+                  <Button asChild variant="ghost">
+                    <Link href="/sign-in">Sign In</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link href="/sign-up">Sign Up</Link>
+                  </Button>
                 </div>
               )}
 
-              {/* Mobile menu button */}
-              <button
-                type="button"
-                className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-                onClick={() => setIsOpen(!isOpen)}
-              >
-                <span className="sr-only">Open main menu</span>
-                {isOpen ? (
-                  <X className="block h-6 w-6" />
-                ) : (
-                  <Menu className="block h-6 w-6" />
-                )}
-              </button>
+              <div className="md:hidden">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsOpen(!isOpen)}
+                >
+                  <span className="sr-only">Open main menu</span>
+                  {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                </Button>
+              </div>
             </motion.div>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         <AnimatePresence>
           {isOpen && (
             <motion.div 
-              className="md:hidden bg-white border-t border-gray-200"
+              className="md:hidden"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                {navItems.map((item, index) => (
-                  <motion.div
-                    key={item.name}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                  >
-                    <Link href={item.href}>
-                      <Button
-                        variant="default"
-                        className="w-full mb-2"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        {item.name}
-                      </Button>
+                {navItems.map((item) => (
+                  <Button asChild variant="ghost" className="w-full justify-start" key={item.name}>
+                    <Link href={item.href} onClick={() => setIsOpen(false)}>
+                      {item.name}
                     </Link>
-                  </motion.div>
+                  </Button>
                 ))}
+                {!user && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <Button asChild variant="ghost" className="w-full justify-start">
+                       <Link href="/sign-in" onClick={() => setIsOpen(false)}>Sign In</Link>
+                    </Button>
+                     <Button asChild className="w-full justify-start">
+                       <Link href="/sign-up" onClick={() => setIsOpen(false)}>Sign Up</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </motion.div>
           )}

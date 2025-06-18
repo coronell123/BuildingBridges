@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from './lib/auth/session';
+import { getToken } from 'next-auth/jwt';
 
 // Define protected paths by role
 const adminOnlyPaths = [
@@ -20,13 +20,17 @@ const publicPaths = [
   '/',
   '/sign-in',
   '/sign-up',
-  '/dashboard/mentors',
   '/mentors',
-  '/contact',
-  '/about',
-  '/api/webhooks/stripe',
+  '/vision',
+  '/workshops',
+  '/activity',
+  '/roadmap',
+  '/privacy-policy',
+  '/tos',
+  '/corporate-design',
+  '/design-system',
   '/onboarding',
-  '/design-system'
+  '/reset-password',
 ];
 
 const isPublicPath = (path: string) => {
@@ -58,45 +62,52 @@ const isStudentOnlyPath = (path: string) => {
   );
 };
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  
-  // Direct server-side redirect for mentors path
-  if (pathname === '/dashboard/mentors' || pathname === '/dashboard/mentors/') {
-    return NextResponse.redirect(new URL('/mentors', request.url));
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Allow files in /public and framework files to pass
+  if (pathname.includes('.') || pathname.startsWith('/_next')) {
+    return NextResponse.next();
   }
 
   // Allow public paths
-  if (isPublicPath(pathname)) {
+  if (publicPaths.includes(pathname)) {
     return NextResponse.next();
   }
   
-  // For all other paths, check authentication
-  const session = await getSession();
-  
-  if (!session) {
-    // Redirect to sign-in if not authenticated
-    return NextResponse.redirect(new URL('/sign-in', request.url));
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+
+  // If no token, and it's not a public path, redirect to sign-in
+  if (!token) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/sign-in';
+    url.searchParams.set('callbackUrl', req.nextUrl.pathname);
+    return NextResponse.redirect(url);
   }
   
-  const userRole = session.user.role || 'STUDENT';
+  // Role-based access control for authenticated users
+  const userRole = token.role as string;
   
-  // Role-based access control
-  if (isAdminOnlyPath(pathname) && userRole !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  if (pathname.startsWith('/dashboard/admin') && userRole !== 'ADMIN') {
+    return NextResponse.redirect(new URL('/dashboard', req.url));
   }
   
-  if (isMentorOnlyPath(pathname) && userRole !== 'MENTOR') {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  if (pathname.startsWith('/dashboard/mentor') && userRole !== 'MENTOR') {
+    return NextResponse.redirect(new URL('/dashboard', req.url));
   }
-  
-  if (isStudentOnlyPath(pathname) && userRole !== 'STUDENT') {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
-  
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 };

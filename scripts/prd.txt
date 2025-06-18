@@ -1,4 +1,73 @@
-# Building Bridges Authentication System and User Roles
+# Product Requirements Document (PRD) for BuildingBridges Recovery
+
+## 1. Overview
+
+The BuildingBridges application is currently in a non-functional and aesthetically poor state. This project aims to restore core functionality, overhaul the user interface, and establish a stable foundation for future development. The primary goal is to create a welcoming, professional, and fully operational web application that serves its mission of empowering FLINTA individuals and girls of color.
+
+## 2. Core Problem
+
+The previous development efforts have left the application with a broken user experience. Key issues include:
+- A non-existent or dysfunctional landing page.
+- A broken or poorly designed navigation bar.
+- A non-functional authentication system (sign-up, sign-in).
+- Lack of clear user roles and test data.
+
+## 3. Goals and Objectives
+
+- **Goal 1: Restore Core Functionality.**
+  - Objective 1.1: Implement a fully functional authentication system (sign-up, sign-in, sign-out).
+  - Objective 1.2: Establish a secure and logical routing structure, protecting dashboard routes and leaving public pages accessible.
+  - Objective 1.3: Set up a proper development environment with sample user data for testing.
+
+- **Goal 2: Overhaul UI/UX.**
+  - Objective 2.1: Design and implement a new, professional, and inspiring landing page.
+  - Objective 2.2: Redesign the main navigation bar to be intuitive, aesthetically pleasing, and functional for both authenticated and unauthenticated users.
+  - Objective 2.3: Ensure a consistent and high-quality design across all user-facing pages.
+
+- **Goal 3: Establish a Stable Foundation.**
+  - Objective 3.1: Create a clear and documented database seeding process for sample users.
+  - Objective 3.2: Ensure the environment variables are correctly configured and documented in an `.env.example` file.
+
+## 4. User Roles & Personas
+
+- **Admin:** Manages the platform, content, and users.
+- **Mentor:** An authenticated user who provides guidance and support.
+- **Student:** An authenticated user (e.g., FLINTA individuals, girls of color) who seeks mentorship and resources.
+- **Guest (Unauthenticated User):** A visitor who can view public pages like the landing page, vision, and ToS.
+
+## 5. Functional Requirements
+
+### 5.1. Environment Setup
+- The system must have an `.env.example` file.
+- This file must contain placeholder variables for three sample users: one student, one mentor, and one admin. Each should have a defined email and password.
+
+### 5.2. Database Seeding
+- A script must exist to seed the database with the sample users.
+- Passwords for seeded users must be securely hashed.
+- The script should assign the correct roles to each sample user as defined in the database schema.
+
+### 5.3. Public Pages
+- A new, visually appealing landing page must be created at the root URL (`/`).
+- The landing page should be accessible to all users, regardless of authentication state.
+- It should clearly communicate the mission of Building Bridges and have clear calls-to-action (e.g., "Sign Up", "Learn More").
+
+### 5.4. Navigation
+- The navigation bar must be present on all pages.
+- For unauthenticated users, it must display links to public pages and "Sign In" / "Sign Up" buttons.
+- For authenticated users, it must replace auth buttons with a link to their dashboard and a user menu with a "Log Out" option.
+- The design should be clean, modern, and responsive.
+
+### 5.5. Authentication
+- The sign-up page must allow new users to register.
+- The sign-in page must allow existing users to log in with their credentials.
+- The sign-out functionality must securely terminate the user's session and redirect them to the landing page.
+- The `middleware.ts` must protect all dashboard routes, redirecting unauthenticated users to the sign-in page.
+
+### 5.6. Dashboard
+- The dashboard must be accessible only to authenticated users.
+- The content or navigation within the dashboard may differ based on the user's role (Admin, Mentor, Student), although the initial implementation can focus on a single, unified dashboard experience.
+
+## Building Bridges Authentication System and User Roles
 
 ## Overview
 The Building Bridges website needs an improved authentication system with user role management. The system should support three distinct user roles (Admin, Student, and Mentor), implement a more robust sign-up and sign-in process, and provide role-specific dashboard experiences.

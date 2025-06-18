@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -9,85 +8,67 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, GraduationCap, Users, AlertCircle } from 'lucide-react';
-import { signIn, signUp } from './actions';
-import { ActionState } from '@/lib/auth/middleware';
+import { signIn } from 'next-auth/react';
+import { useState, useTransition } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useState, useTransition, useEffect } from 'react';
+import { signUp } from './actions';
+import type { ActionState } from '@/lib/auth/middleware';
 
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect');
-  const priceId = searchParams.get('priceId');
-  const inviteId = searchParams.get('inviteId');
-  const [state, formAction, pending] = useActionState<ActionState, FormData>(
-    mode === 'signin' ? signIn : signUp,
-    { error: '' }
-  );
-  
-  // Add startTransition for form actions
+  const redirect = searchParams.get('redirect') || '/dashboard';
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
-  
-  // Add client-side validation state
-  const [validationErrors, setValidationErrors] = useState<{
-    email?: string;
-    password?: string;
-  }>({});
+  const [signUpState, setSignUpState] = useState<ActionState>({});
 
-  // React to successful authentication
-  useEffect(() => {
-    // If authentication succeeded (no error) and action completed
-    if (state && !state.error && state.success && !isPending && !pending) {
-      // Navigate to the path returned by the server action, falling back to defaults if not provided
-      const redirectPath = state.redirectTo || (mode === 'signin' ? '/dashboard' : '/onboarding');
-      
-      // Use router for client-side navigation to avoid server action redirect issues
-      router.push(redirectPath);
-    }
-  }, [state, isPending, pending, mode, router]);
-
-  // Client-side validation function
-  const validateForm = (formData: FormData): boolean => {
+  const handleSignIn = async (formData: FormData) => {
+    setLoading(true);
+    setError('');
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
-    const errors: {email?: string; password?: string} = {};
-    let isValid = true;
 
-    // Email validation
-    if (!email || email.trim() === '') {
-      errors.email = 'Email is required';
-      isValid = false;
-    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
-      errors.email = 'Please enter a valid email address';
-      isValid = false;
+    const res = await signIn('credentials', {
+      redirect: false,
+      email,
+      password,
+      callbackUrl: redirect,
+    });
+
+    if (res?.error) {
+      setError('Invalid email or password.');
+    } else if (res?.url) {
+      router.push(res.url);
     }
-
-    // Password validation
-    if (!password) {
-      errors.password = 'Password is required';
-      isValid = false;
-    } else if (mode === 'signup' && password.length < 8) {
-      errors.password = 'Password must be at least 8 characters';
-      isValid = false;
-    }
-
-    setValidationErrors(errors);
-    return isValid;
+    setLoading(false);
   };
 
-  // Enhanced form submission with validation
+  const handleSignUp = async (formData: FormData) => {
+    startTransition(async () => {
+      const initialState: ActionState = { error: undefined };
+      const result = await signUp(initialState, formData);
+      if (result?.error) {
+        setSignUpState({ error: result.error });
+      } else {
+        // On successful sign-up, redirect to sign-in page to log in
+        router.push('/sign-in?signup=success');
+      }
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    
-    if (validateForm(formData)) {
-      // Wrap formAction call in startTransition
-      startTransition(() => {
-        formAction(formData);
-      });
+    const formData = new FormData(e.currentTarget);
+    if (mode === 'signin') {
+      handleSignIn(formData);
+    } else {
+      handleSignUp(formData);
     }
   };
+  
+    // In the return statement, the button's disabled state depends on `loading` for signin and `isPending` for signup.
+    // The error display should use the local `error` state for signin and `signUpState.error` for signup.
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -113,8 +94,8 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <input type="hidden" name="redirect" value={redirect || ''} />
-              <input type="hidden" name="priceId" value={priceId || ''} />
-              <input type="hidden" name="inviteId" value={inviteId || ''} />
+              <input type="hidden" name="priceId" value={searchParams.get('priceId') || ''} />
+              <input type="hidden" name="inviteId" value={searchParams.get('inviteId') || ''} />
               
               <div>
                 <Label htmlFor="email" className="text-gray-700">Email address</Label>
@@ -125,19 +106,19 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                   required
                   maxLength={50}
                   className={`mt-1 rounded-full border-gray-300 focus:border-purple-500 focus:ring-purple-500 ${
-                    validationErrors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+                    error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
                   }`}
                   placeholder="you@example.com"
                   onChange={() => {
-                    if (validationErrors.email) {
-                      setValidationErrors(prev => ({ ...prev, email: undefined }));
+                    if (error) {
+                      setError('');
                     }
                   }}
                 />
-                {validationErrors.email && (
+                {error && (
                   <div className="mt-1 text-sm text-red-600 flex items-center">
                     <AlertCircle className="h-4 w-4 mr-1" />
-                    {validationErrors.email}
+                    {error}
                   </div>
                 )}
               </div>
@@ -155,19 +136,19 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                   minLength={mode === 'signup' ? 8 : undefined}
                   maxLength={100}
                   className={`mt-1 rounded-full border-gray-300 focus:border-purple-500 focus:ring-purple-500 ${
-                    validationErrors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+                    error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
                   }`}
                   placeholder="••••••••"
                   onChange={() => {
-                    if (validationErrors.password) {
-                      setValidationErrors(prev => ({ ...prev, password: undefined }));
+                    if (error) {
+                      setError('');
                     }
                   }}
                 />
-                {validationErrors.password && (
+                {error && (
                   <div className="mt-1 text-sm text-red-600 flex items-center">
                     <AlertCircle className="h-4 w-4 mr-1" />
-                    {validationErrors.password}
+                    {error}
                   </div>
                 )}
                 {mode === 'signup' && (
@@ -214,28 +195,24 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 </div>
               )}
 
-              {state?.error && (
+              {mode === 'signup' && signUpState?.error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center">
                   <AlertCircle className="h-4 w-4 mr-2" />
-                  {state.error}
+                  {signUpState.error}
                 </div>
               )}
 
               <Button
                 type="submit"
-                disabled={pending || isPending}
+                disabled={loading || isPending}
                 className="w-full bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full py-2.5 transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
-                {(pending || isPending) ? (
+                {(loading || isPending) ? (
                   <>
                     <Loader2 className="animate-spin mr-2 h-4 w-4" />
                     Loading...
                   </>
-                ) : mode === 'signin' ? (
-                  'Sign in'
-                ) : (
-                  'Sign up'
-                )}
+                ) : mode === 'signin' ? 'Sign in' : 'Sign up'}
               </Button>
             </form>
 

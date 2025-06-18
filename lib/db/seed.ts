@@ -1,88 +1,71 @@
-import { stripe } from '../payments/stripe';
+import 'dotenv/config';
 import { db } from './drizzle';
-import { users, teams, teamMembers } from './schema';
-import { hashPassword } from '@/lib/auth/session';
+import * as schema from './schema';
+import bcrypt from 'bcryptjs';
+import { sql } from 'drizzle-orm';
 
-async function createStripeProducts() {
-  console.log('Creating Stripe products and prices...');
-
-  const baseProduct = await stripe.products.create({
-    name: 'Base',
-    description: 'Base subscription plan',
-  });
-
-  await stripe.prices.create({
-    product: baseProduct.id,
-    unit_amount: 800, // $8 in cents
-    currency: 'usd',
-    recurring: {
-      interval: 'month',
-      trial_period_days: 7,
-    },
-  });
-
-  const plusProduct = await stripe.products.create({
-    name: 'Plus',
-    description: 'Plus subscription plan',
-  });
-
-  await stripe.prices.create({
-    product: plusProduct.id,
-    unit_amount: 1200, // $12 in cents
-    currency: 'usd',
-    recurring: {
-      interval: 'month',
-      trial_period_days: 7,
-    },
-  });
-
-  console.log('Stripe products and prices created successfully.');
-}
+const { hash } = bcrypt;
 
 async function seed() {
-  const email = 'test@test.com';
-  const password = 'admin123';
-  const passwordHash = await hashPassword(password);
+  console.log('🌱 Starting database seed...');
 
-  const [user] = await db
-    .insert(users)
-    .values([
-      {
-        email: email,
-        name: 'Test User',
-        passwordHash: passwordHash,
-        role: 'ADMIN',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null,
-      },
-    ])
-    .returning();
+  if (
+    !process.env.ADMIN_EMAIL ||
+    !process.env.ADMIN_PASSWORD ||
+    !process.env.MENTOR_EMAIL ||
+    !process.env.MENTOR_PASSWORD ||
+    !process.env.STUDENT_EMAIL ||
+    !process.env.STUDENT_PASSWORD
+  ) {
+    throw new Error('Sample user credentials are not fully set in environment variables');
+  }
 
-  console.log('Initial user created.');
+  // Hashing passwords
+  const adminPasswordHash = await hash(process.env.ADMIN_PASSWORD!, 10);
+  const mentorPasswordHash = await hash(process.env.MENTOR_PASSWORD!, 10);
+  const studentPasswordHash = await hash(process.env.STUDENT_PASSWORD!, 10);
 
-  const [team] = await db
-    .insert(teams)
-    .values({
-      name: 'Test Team',
-    })
-    .returning();
+  // Upserting users
+  // This is a simple delete and insert, suitable for a seed script.
+  
+  console.log('Clearing existing sample users if they exist...');
+  await db.delete(schema.users).where(
+      sql`${schema.users.email} IN (${process.env.ADMIN_EMAIL}, ${process.env.MENTOR_EMAIL}, ${process.env.STUDENT_EMAIL})`
+  );
+  
+  console.log('Inserting new sample users...');
+  await db.insert(schema.users).values([
+    {
+      name: 'Admin User',
+      email: process.env.ADMIN_EMAIL!,
+      passwordHash: adminPasswordHash,
+      role: 'ADMIN',
+    },
+    {
+      name: 'Mentor User',
+      email: process.env.MENTOR_EMAIL!,
+      passwordHash: mentorPasswordHash,
+      role: 'MENTOR',
+    },
+    {
+      name: 'Student User',
+      email: process.env.STUDENT_EMAIL!,
+      passwordHash: studentPasswordHash,
+      role: 'STUDENT',
+    },
+  ]);
 
-  await db.insert(teamMembers).values({
-    teamId: team.id,
-    userId: user.id,
-    role: 'owner',
-  });
-
-  await createStripeProducts();
+  console.log('✅ Database seeded successfully!');
 }
 
 seed()
   .catch((error) => {
-    console.error('Seed process failed:', error);
+    console.error('❌ Error seeding database:', error);
     process.exit(1);
   })
-  .finally(() => {
+  .finally(async () => {
     console.log('Seed process finished. Exiting...');
+    const { client } = await import('./drizzle');
+    await client.end();
     process.exit(0);
   });

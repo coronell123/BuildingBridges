@@ -1,18 +1,21 @@
+import NextAuth, { getServerSession, type NextAuthOptions, type DefaultSession } from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { db } from "@/lib/db";
+import { db } from "@/lib/db/drizzle";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { getServerSession, type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { type DefaultSession } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { compare } from 'bcryptjs';
 
-// Extend the built-in session types
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user?: {
       id: string;
-      role?: "USER" | "ADMIN";
+      role?: "ADMIN" | "STUDENT" | "MENTOR";
     } & DefaultSession["user"];
+  }
+  interface User {
+    role?: "ADMIN" | "STUDENT" | "MENTOR";
   }
 }
 
@@ -22,34 +25,64 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   pages: {
-    signIn: "/login",
+    signIn: "/sign-in",
   },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials.password) {
+          return null;
+        }
+
+        const user = await db.query.users.findFirst({
+          where: eq(users.email, credentials.email),
+        });
+
+        if (!user || !user.passwordHash) {
+          return null;
+        }
+
+        const isValidPassword = await compare(credentials.password, user.passwordHash);
+
+        if (!isValidPassword) {
+          return null;
+        }
+
+        return {
+          id: user.id.toString(),
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        };
+      },
+    }),
   ],
   callbacks: {
-    async session({ token, session }) {
-      if (token.sub && session.user) {
-        session.user.id = token.sub;
-        
-        // Fetch user role from database
-        const dbUser = await db.query.users.findFirst({
-          where: eq(users.id, parseInt(token.sub)),
-        });
-        
-        if (dbUser) {
-          session.user.role = dbUser.role as "USER" | "ADMIN";
-        }
+    session: ({ session, token }) => {
+      if (session.user) {
+        session.user.id = token.sub!;
+        session.user.role = token.role as "ADMIN" | "STUDENT" | "MENTOR";
       }
       return session;
     },
-    async jwt({ token }) {
+    jwt: ({ token, user }) => {
+      if (user) {
+        token.sub = user.id;
+        token.role = user.role;
+      }
       return token;
     },
   },
 };
 
-export const auth = () => getServerSession(authOptions); 
+export const auth = () => getServerSession(authOptions);
+export default NextAuth(authOptions); 

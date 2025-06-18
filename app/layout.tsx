@@ -1,10 +1,9 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
-import { UserProvider } from '@/lib/auth/index';
-import { getUser } from '@/lib/db/queries';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
+import { Providers } from './providers';
 
 // Configure Inter font
 const inter = Inter({
@@ -34,21 +33,19 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  let userPromise = getUser();
-
   return (
     <html 
       lang="de" 
       className={`${inter.variable} ${jetbrainsMono.variable}`}
     >
       <body className="font-primary antialiased min-h-[100dvh]">
-        <UserProvider userPromise={userPromise}>
+        <Providers>
           <div className="min-h-screen flex flex-col">
             <Navbar />
             <main className="flex-1 mt-16">{children}</main>
             <Footer />
           </div>
-        </UserProvider>
+        </Providers>
       </body>
     </html>
   );
