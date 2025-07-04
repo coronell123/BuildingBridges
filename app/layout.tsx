@@ -15,7 +15,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    // Temporarily disable ClerkProvider for development
+    // <ClerkProvider>
       <html
         lang="en"
         className={`bg-white dark:bg-gray-950 text-black dark:text-white ${manrope.className}`}
@@ -28,6 +29,6 @@ export default function RootLayout({
           </div>
         </body>
       </html>
-    </ClerkProvider>
+    // </ClerkProvider>
   );
 }

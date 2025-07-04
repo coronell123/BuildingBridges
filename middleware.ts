@@ -1,11 +1,13 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+// Temporarily disable Clerk middleware for development
+// import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/forum(.*)','/settings(.*)','/profile(.*)','/activity(.*)','/security(.*)'])
+// const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/forum(.*)','/settings(.*)','/profile(.*)','/activity(.*)','/security(.*)'])
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) await auth.protect()
-    
-})
+// Simple middleware for development without authentication
+export default function middleware() {
+  // No authentication required during development
+  return;
+}
 
 export const config = {
   matcher: [

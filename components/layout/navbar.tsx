@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useUser, SignInButton, SignUpButton, UserButton, SignedIn, SignedOut } from '@clerk/nextjs';
+// Temporarily disable Clerk imports for development
+// import { useUser, SignInButton, SignUpButton, UserButton, SignedIn, SignedOut } from '@clerk/nextjs';
 
 const navItems = [
   { name: 'Vision', href: '/vision' },
@@ -15,7 +16,8 @@ const navItems = [
 ];
 
 export function Navbar() {
-  const { user, isLoaded } = useUser();
+  // Temporarily disable Clerk hook for development
+  // const { user, isLoaded } = useUser();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -51,36 +53,27 @@ export function Navbar() {
               ))}
             </div>
 
-            {/* Auth Buttons */}
+            {/* Auth Buttons - Temporarily simplified for development */}
             <div className="flex items-center space-x-4">
-              <SignedIn>
+              {/* Temporarily show static buttons instead of Clerk components */}
+              <div className="flex items-center gap-4">
                 <Button
                   asChild
                   className="bg-gradient-to-b from-[#8c52ff] to-black text-white rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
                 >
                   <Link href="/dashboard">Dashboard</Link>
                 </Button>
-                <UserButton afterSignOutUrl="/" />
-              </SignedIn>
-              
-              <SignedOut>
-                <div className="flex items-center gap-4">
-                  <SignInButton mode="modal">
-                    <Button
-                      className="bg-white hover:bg-gray-100 text-black text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105"
-                    >
-                      Sign In
-                    </Button>
-                  </SignInButton>
-                  <SignUpButton mode="modal">
-                    <Button
-                      className="bg-gradient-to-b from-[#8c52ff] to-black text-white text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                    >
-                      Sign Up
-                    </Button>
-                  </SignUpButton>
-                </div>
-              </SignedOut>
+                <Button
+                  className="bg-white hover:bg-gray-100 text-black text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105"
+                >
+                  Sign In
+                </Button>
+                <Button
+                  className="bg-gradient-to-b from-[#8c52ff] to-black text-white text-sm px-6 py-2 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                >
+                  Sign Up
+                </Button>
+              </div>
 
               {/* Mobile menu button */}
               <button
