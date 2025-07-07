@@ -20,11 +20,10 @@ import {
 import { signOut } from '@/app/(login)/actions';
 
 const navItems = [
-  { name: 'Vision', href: '/vision' },
   { name: 'Workshops', href: '/workshops' },
   { name: 'Activity', href: '/activity' },
-  { name: 'Roadmap', href: '/roadmap' },
   { name: 'Mentors', href: '/mentors' },
+  { name: 'Contact', href: '/contact' },
 ];
 
 export function Navbar() {
