@@ -1,34 +1,23 @@
 'use client';
 
 import Link from 'next/link';
-// @ts-ignore - useActionState is experimental in React 18
-import { useActionState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, GraduationCap, Users, AlertCircle, Heart, Globe, BookOpen } from 'lucide-react';
-import { signIn, signUp } from './actions';
-import { ActionState } from '@/lib/auth/middleware';
+import { GraduationCap, Users, AlertCircle, Heart, Globe, BookOpen } from 'lucide-react';
+import { signInAction, signUpAction } from './actions';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useState, useTransition, useEffect } from 'react';
-import Image from 'next/image';
+import { useState } from 'react';
 
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
   const inviteId = searchParams.get('inviteId');
-  const [state, formAction, pending] = useActionState<ActionState, FormData>(
-    mode === 'signin' ? signIn : signUp,
-    { error: '' }
-  );
-  
-  // Add startTransition for form actions
-  const [isPending, startTransition] = useTransition();
+  const error = searchParams.get('error');
   
   // Add client-side validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -36,58 +25,16 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
     password?: string;
   }>({});
 
-  // React to successful authentication
-  useEffect(() => {
-    // If authentication succeeded (no error) and action completed
-    if (state && !state.error && state.success && !isPending && !pending) {
-      // Navigate to the path returned by the server action, falling back to defaults if not provided
-      const redirectPath = state.redirectTo || (mode === 'signin' ? '/dashboard' : '/onboarding');
-      
-      // Use router for client-side navigation to avoid server action redirect issues
-      router.push(redirectPath);
-    }
-  }, [state, isPending, pending, mode, router]);
-
-  // Client-side validation function
-  const validateForm = (formData: FormData): boolean => {
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const errors: {email?: string; password?: string} = {};
-    let isValid = true;
-
-    // Email validation
-    if (!email || email.trim() === '') {
-      errors.email = 'Email ist erforderlich';
-      isValid = false;
-    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
-      errors.email = 'Bitte geben Sie eine gültige E-Mail-Adresse ein';
-      isValid = false;
-    }
-
-    // Password validation
-    if (!password) {
-      errors.password = 'Passwort ist erforderlich';
-      isValid = false;
-    } else if (mode === 'signup' && password.length < 8) {
-      errors.password = 'Passwort muss mindestens 8 Zeichen lang sein';
-      isValid = false;
-    }
-
-    setValidationErrors(errors);
-    return isValid;
-  };
-
-  // Enhanced form submission with validation
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    
-    if (validateForm(formData)) {
-      // Wrap formAction call in startTransition
-      startTransition(() => {
-        formAction(formData);
-      });
+  const getErrorMessage = (errorCode: string | null) => {
+    switch (errorCode) {
+      case 'missing-credentials':
+        return 'Bitte geben Sie E-Mail und Passwort ein.';
+      case 'invalid-credentials':
+        return 'Ungültige E-Mail oder Passwort. Bitte versuchen Sie es erneut.';
+      case 'server-error':
+        return 'Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+      default:
+        return null;
     }
   };
 
@@ -134,10 +81,21 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               </p>
             </div>
 
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-6" action={mode === 'signin' ? signInAction : signUpAction}>
               <input type="hidden" name="redirect" value={redirect || ''} />
               <input type="hidden" name="priceId" value={priceId || ''} />
               <input type="hidden" name="inviteId" value={inviteId || ''} />
+              
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center"
+                >
+                  <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+                  {getErrorMessage(error)}
+                </motion.div>
+              )}
               
               <div>
                 <Label htmlFor="email" className="text-gray-700 font-medium">E-Mail-Adresse</Label>
@@ -237,32 +195,11 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 </div>
               )}
 
-              {state?.error && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center"
-                >
-                  <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-                  {state.error}
-                </motion.div>
-              )}
-
               <Button
                 type="submit"
-                disabled={pending || isPending}
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg py-3 font-semibold transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5"
               >
-                {(pending || isPending) ? (
-                  <>
-                    <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                    Wird geladen...
-                  </>
-                ) : mode === 'signin' ? (
-                  'Anmelden'
-                ) : (
-                  'Konto erstellen'
-                )}
+                {mode === 'signin' ? 'Anmelden' : 'Konto erstellen'}
               </Button>
             </form>
 
