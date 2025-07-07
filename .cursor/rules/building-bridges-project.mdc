@@ -1,0 +1,177 @@
+# Building Bridges Project Guidelines
+
+**Building Bridges** is an interdisciplinary research project empowering girls and FLINTA* of Colour (M*oC) from 10th grade onwards, led by Freie Universität Berlin, Stiftung SPI, and Universität Duisburg-Essen, running for 36 months starting September 2024.
+
+## **Project Identity & Branding**
+
+- **Project Name**: "Building Bridges" (German: "Building Bridges")
+- **Target Audience**: Girls and FLINTA* of Colour (M*oC) from 10th grade onwards
+- **Academic Partners**: FU Berlin, Stiftung SPI, UDE
+- **Duration**: 36 months from September 2024
+- **Focus**: Mentoring and Empowerment Program (MEP) + digital storytelling platform
+
+### **Visual Identity**
+- **Logo**: Use `logo_buildingBridges.svg` for main branding
+- **Cover Image**: `coverimage.png` for hero backgrounds with parallax effects
+- **Color Scheme**: Warm, inclusive colors reflecting diversity and empowerment
+- **Typography**: Clear, accessible fonts supporting multilingual content
+
+## **Content Guidelines**
+
+### **Language & Localization**
+- **Primary Language**: German (target audience in Germany)
+- **Form Labels**: German with clear, accessible language
+- **Error Messages**: German with helpful guidance
+- **Academic Tone**: Professional but approachable for young adults
+
+### **User Roles & Personas**
+- **Students**: Girls and FLINTA* of Colour seeking academic empowerment
+- **Mentors**: Academic professionals and researchers
+- **Admins**: Project coordinators and research staff
+
+## **Technical Architecture**
+
+### **Core Stack**
+- **Framework**: Next.js 14.2.18 (stable, avoid canary versions)
+- **Database**: PostgreSQL with Drizzle ORM
+- **Authentication**: Custom session-based auth with bcryptjs
+- **Styling**: Tailwind CSS with custom design system
+- **Deployment**: Vercel with GitHub Actions
+
+### **File Structure Patterns**
+```
+app/
+├── (dashboard)/     # Protected dashboard routes
+├── (login)/         # Authentication routes
+├── api/            # API endpoints
+└── globals.css     # Global styles
+
+components/
+├── layout/         # Navigation, footer
+├── ui/            # Reusable UI components
+└── shared/        # Shared components
+
+lib/
+├── auth/          # Authentication logic
+├── db/           # Database configuration
+└── design-system/ # Design tokens
+```
+
+## **Database Schema Patterns**
+
+### **User Management**
+- **Roles**: `STUDENT`, `MENTOR`, `ADMIN`
+- **Authentication**: Session-based with secure cookies
+- **Onboarding**: Comprehensive data collection for research purposes
+
+### **Naming Conventions**
+- **Tables**: snake_case (e.g., `onboarding_data`)
+- **Columns**: snake_case with clear, descriptive names
+- **IDs**: Use `id` as primary key, `user_id` for foreign keys
+
+## **Authentication Patterns**
+
+### **Session Management**
+```typescript
+// Always use secure session cookies
+const sessionConfig = {
+  secure: process.env.NODE_ENV === 'production',
+  httpOnly: true,
+  sameSite: 'lax' as const
+}
+```
+
+### **Role-Based Access**
+- **Middleware**: Check authentication and roles in `middleware.ts`
+- **Protected Routes**: Use `(dashboard)` route groups
+- **Public Routes**: Landing pages, contact, workshops
+
+## **Component Patterns**
+
+### **Form Handling**
+```typescript
+// Use useFormState for React 18 compatibility
+import { useFormState } from 'react-dom';
+
+const [state, formAction, isPending] = useFormState(
+  serverAction,
+  { error: '', success: '' }
+);
+```
+
+### **Error Handling**
+- **Validation**: Zod schemas for type safety
+- **User Feedback**: Clear German error messages
+- **Fallbacks**: Graceful degradation for all features
+
+## **Styling Guidelines**
+
+### **Design System**
+- **Colors**: Use design tokens from `lib/design-system/config/colors.ts`
+- **Spacing**: Consistent spacing scale
+- **Typography**: Accessible hierarchy with proper contrast
+
+### **Responsive Design**
+- **Mobile-First**: Start with mobile layouts
+- **Breakpoints**: Use Tailwind's responsive utilities
+- **Touch Targets**: Ensure 44px minimum for interactive elements
+
+## **Performance & SEO**
+
+### **Image Optimization**
+- **Next.js Image**: Always use `next/image` for optimization
+- **Formats**: WebP with fallbacks
+- **Lazy Loading**: Default behavior for below-fold images
+
+### **Video Integration**
+```typescript
+// Use native HTML5 video with controls
+<video
+  controls
+  className="w-full rounded-lg"
+  poster="/video-poster.jpg"
+>
+  <source src="/video.mp4" type="video/mp4" />
+</video>
+```
+
+## **Deployment & CI/CD**
+
+### **Build Requirements**
+- **Node.js**: Use stable LTS version
+- **Package Manager**: pnpm for consistent installs
+- **Environment**: Separate configs for dev/staging/prod
+
+### **Pre-deployment Checklist**
+- ✅ Run `npm run build` successfully
+- ✅ Test database migrations
+- ✅ Verify environment variables
+- ✅ Check for experimental features (remove if unstable)
+
+## **Security Considerations**
+
+### **Data Protection**
+- **GDPR Compliance**: Explicit consent for data collection
+- **Password Security**: bcryptjs with proper salt rounds
+- **Session Security**: Secure, httpOnly cookies
+
+### **Input Validation**
+- **Server-Side**: Always validate on server
+- **Client-Side**: Enhance UX with immediate feedback
+- **Sanitization**: Escape user input in displays
+
+## **Research & Academic Focus**
+
+### **Data Collection**
+- **Onboarding**: Comprehensive background information
+- **Progress Tracking**: Academic and personal development
+- **Privacy**: Anonymization for research use
+
+### **Mentoring Features**
+- **Matching**: Algorithm-based mentor-student pairing
+- **Communication**: Secure messaging within platform
+- **Resources**: Academic and career development materials
+description:
+globs:
+alwaysApply: false
+---

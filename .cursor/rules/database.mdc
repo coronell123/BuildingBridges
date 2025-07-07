@@ -1,0 +1,36 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Database Guide
+
+This document provides guidelines for interacting with the project's database.
+
+## Key Technologies
+
+*   **Database**: PostgreSQL hosted on [Neon](https://neon.tech/).
+*   **ORM**: [Drizzle ORM](https://orm.drizzle.team/).
+*   **Connection URL**: The database connection string is stored in the `DATABASE_URL` environment variable.
+
+## Schema
+
+The database schema is defined in `lib/db/schema.ts`. This file is the single source of truth for all table structures, columns, and relations.
+
+*   **`users` table**: Stores user information, including `name`, `email`, `passwordHash`, and `role`.
+*   **`roleEnum`**: A PostgreSQL enum type for user roles, currently defined as `"ADMIN"`, `"STUDENT"`, and `"MENTOR"`.
+*   **Other tables**: The schema also includes tables for `accounts`, `sessions`, `teams`, `team_members`, `activity_logs`, and `invitations` to support NextAuth.js and future team-based features.
+
+## Migrations
+
+Database migrations are managed by Drizzle.
+
+*   To generate a new migration after changing `lib/db/schema.ts`, run: `pnpm run db:generate`.
+*   To apply migrations to the database, run: `pnpm run db:migrate`.
+
+## Seeding
+
+A seeding script at `lib/db/seed.ts` is used to populate the database with initial data, including the sample users defined in the environment variables.
+
+*   To run the seed script, use: `pnpm run db:seed`.
+*   Always ensure your `.env` file has the correct `DATABASE_URL` and sample user credentials before seeding.
