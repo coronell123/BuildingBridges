@@ -12,7 +12,7 @@ import {
 import { Loader2, PlusCircle } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { useActionState } from 'react';
+import { useFormState } from 'react-dom';
 import { inviteTeamMember } from '@/app/(login)/actions';
 import { useUser } from '@/lib/auth/index';
 
@@ -24,7 +24,7 @@ type ActionState = {
 export function InviteTeamMember() {
   const { user } = useUser();
   const isOwner = user?.role === 'ADMIN';
-  const [inviteState, inviteAction, isInvitePending] = useActionState<
+  const [inviteState, inviteAction, isInvitePending] = useFormState<
     ActionState,
     FormData
   >(inviteTeamMember, { error: '', success: '' });
