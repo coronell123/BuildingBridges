@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const nextConfig = {
   // Ensure stable builds
@@ -7,14 +12,25 @@ const nextConfig = {
   // Optimize for production builds
   compress: true,
   
-  // Experimental features to fix client reference manifest issues
+  // Experimental features - remove problematic settings that cause client reference manifest issues
   experimental: {
-    ppr: false,
-    serverComponentsExternalPackages: [],
+    // Disable problematic features that cause manifest generation issues
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
   
-  // Webpack configuration for better builds
-  webpack: (config, { isServer }) => {
+  // Webpack configuration for better builds and caching
+  webpack: (config, { dev, isServer }) => {
+    // Better error handling for development cache issues
+    if (dev) {
+      config.cache = {
+        type: 'filesystem',
+        buildDependencies: {
+          config: [__filename],
+        },
+        cacheDirectory: path.resolve(__dirname, '.next/cache/webpack'),
+      };
+    }
+    
     // Ensure proper handling of client components
     if (!isServer) {
       config.resolve.fallback = {
@@ -34,33 +50,19 @@ const nextConfig = {
     return config;
   },
   
-  // Prevent build issues with dynamic imports
-  transpilePackages: ['framer-motion'],
-  
-  // Image optimization
-  images: {
-    domains: [],
-    formats: ['image/webp', 'image/avif'],
+  // Prevent build issues with empty pages
+  typescript: {
+    // Don't type-check during build to avoid stopping on type errors
+    ignoreBuildErrors: false,
   },
   
-  // Headers for better performance
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-        ],
-      },
-    ];
+  // Logging configuration
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
   },
 };
 
 export default nextConfig;
+

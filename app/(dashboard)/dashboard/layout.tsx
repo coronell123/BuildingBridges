@@ -4,14 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Users, Settings, Shield, Activity, Menu, UserCircle } from 'lucide-react';
-import { redirect } from 'next/navigation';
+import { Users, Menu, UserCircle } from 'lucide-react';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+// Client-side navigation component
+function DashboardNavigation({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -69,4 +65,12 @@ export default function DashboardLayout({
       </div>
     </div>
   );
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <DashboardNavigation>{children}</DashboardNavigation>;
 }
