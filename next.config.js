@@ -7,6 +7,12 @@ const nextConfig = {
   // Optimize for production builds
   compress: true,
   
+  // Experimental features to fix client reference manifest issues
+  experimental: {
+    ppr: false,
+    serverComponentsExternalPackages: [],
+  },
+  
   // Webpack configuration for better builds
   webpack: (config, { isServer }) => {
     // Ensure proper handling of client components
@@ -18,6 +24,12 @@ const nextConfig = {
         tls: false,
       };
     }
+    
+    // Ensure proper module resolution
+    config.resolve.extensionAlias = {
+      '.js': ['.js', '.ts'],
+      '.jsx': ['.jsx', '.tsx'],
+    };
     
     return config;
   },
