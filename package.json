@@ -19,8 +19,7 @@
     "db:studio": "drizzle-kit studio",
     "list": "node scripts/dev.js list",
     "generate": "node scripts/dev.js generate",
-    "parse-prd": "node scripts/dev.js parse-prd",
-    "postinstall": "pnpm run db:generate"
+    "parse-prd": "node scripts/dev.js parse-prd"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
