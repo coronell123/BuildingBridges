@@ -20,11 +20,10 @@ import {
 import { signOut } from '@/app/(login)/actions';
 
 const navItems = [
-  { name: 'Vision', href: '/vision' },
   { name: 'Workshops', href: '/workshops' },
   { name: 'Activity', href: '/activity' },
-  { name: 'Roadmap', href: '/roadmap' },
   { name: 'Mentors', href: '/mentors' },
+  { name: 'Contact', href: '/contact' },
 ];
 
 export function Navbar() {
@@ -51,12 +50,6 @@ export function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
-      <motion.div 
-        className="absolute inset-0 bg-[url('/abstract.svg')] bg-center bg-no-repeat bg-cover"
-        initial={{ opacity: 0.5 }}
-        animate={{ opacity: scrolled ? 0.3 : 0.5 }}
-        transition={{ duration: 0.3 }}
-      />
       <motion.nav 
         className="relative border-b border-gray-200"
         animate={{

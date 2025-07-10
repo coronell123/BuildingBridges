@@ -1,0 +1,34 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Application Testing Workflow
+
+This rule establishes a mandatory testing procedure that must be followed before marking any task as complete or submitting code for review. The goal is to catch runtime errors, verify functionality, and ensure application stability.
+
+## Core Principle
+
+**Never assume code works.** All changes, no matter how small, must be validated in a running instance of the application.
+
+## Mandatory Testing Steps
+
+1.  **Build the Application**: After making code changes, always run a production build to catch any build-time errors.
+    ```bash
+    pnpm build
+    ```
+
+2.  **Run the Development Server**: Start the local development server to perform runtime testing.
+    ```bash
+    pnpm dev
+    ```
+
+3.  **Automated Page Validation**: Once the server is running, I will perform an automated check on all application routes. This involves:
+    *   **Discovering all pages**: I will generate a list of all page routes by scanning the `app` directory for `page.tsx` files.
+    *   **Checking each page**: For each discovered route, I will use a command-line tool like `curl` to request the page.
+    *   **Verifying the response**: I will check the HTTP status code for a `200 OK` response and inspect the HTML content for any obvious error messages (e.g., "Unhandled Runtime Error", "Internal Server Error").
+    *   This automated check serves as a baseline validation, as I cannot visually inspect the pages for rendering bugs.
+
+4.  **Manual Verification (User-Assisted)**: After automated checks pass, I will ask you to confirm the visual and interactive aspects of the changes on the key pages affected.
+
+5.  **Confirmation**: Only after completing these steps without discovering any critical errors can I consider the task complete. If errors are found, they must be fixed before proceeding.

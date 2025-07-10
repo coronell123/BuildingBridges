@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { customerPortalAction } from '@/lib/payments/actions';
-import { useActionState } from 'react';
+import { useFormState } from 'react-dom';
 import { TeamDataWithMembers, User } from '@/lib/db/schema';
 import { removeTeamMember } from '@/app/(login)/actions';
 import { InviteTeamMember } from './invite-team';
@@ -19,7 +19,7 @@ type SettingsProps = {
 };
 
 export function Settings({ teamData }: SettingsProps) {
-  const [removeState, removeAction, isRemovePending] = useActionState<
+  const [removeState, removeAction, isRemovePending] = useFormState<
     ActionState,
     FormData
   >(removeTeamMember, { error: '', success: '' });

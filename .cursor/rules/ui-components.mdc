@@ -1,0 +1,19 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# UI Components Guide
+
+This project uses a set of reusable UI components located in `components/ui`. These components are built using [shadcn/ui](https://ui.shadcn.com/) conventions.
+
+## Key Characteristics
+
+*   **Composition**: Components are designed to be composed together to build complex UIs.
+*   **Styling**: Styling is handled by [Tailwind CSS](https://tailwindcss.com/).
+*   **Variants**: Many components, like the [Button](mdc:components/ui/button.tsx), use `class-variance-authority` to offer different variants and sizes. You can see the available variants in the `buttonVariants` export in the component file.
+*   **Extensibility**: The `cn` utility from `lib/utils.ts` is used to merge Tailwind CSS classes, making it easy to extend or override styles.
+
+## Usage
+
+When building new UI, always check the `components/ui` directory first to see if a suitable component already exists. If you need a new UI element, follow the existing patterns to create a new, reusable component in this directory.

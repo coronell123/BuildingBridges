@@ -1,0 +1,403 @@
+# Database Patterns with Drizzle ORM
+
+## **Schema Design**
+
+### **✅ DO: Clear Table Structure**
+```typescript
+// lib/db/schema.ts
+import { pgTable, text, timestamp, varchar, boolean } from 'drizzle-orm/pg-core';
+
+export const users = pgTable('users', {
+  id: text('id').primaryKey(),
+  email: varchar('email', { length: 255 }).unique().notNull(),
+  password: text('password').notNull(),
+  role: varchar('role', { length: 20 }).notNull().default('STUDENT'),
+  firstName: varchar('first_name', { length: 100 }),
+  lastName: varchar('last_name', { length: 100 }),
+  emailVerified: timestamp('email_verified'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const onboardingData = pgTable('onboarding_data', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').references(() => users.id).notNull(),
+  challenges: text('challenges'),
+  goals: text('goals'),
+  interests: text('interests'),
+  background: text('background'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+```
+
+### **Naming Conventions**
+- **Tables**: `snake_case` (e.g., `onboarding_data`)
+- **Columns**: `snake_case` (e.g., `first_name`, `created_at`)
+- **Primary Keys**: Always `id`
+- **Foreign Keys**: `{table}_id` (e.g., `user_id`)
+- **Timestamps**: `created_at`, `updated_at`
+
+## **Database Configuration**
+
+### **✅ DO: Environment-Based Configuration**
+```typescript
+// drizzle.config.ts
+import { defineConfig } from 'drizzle-kit';
+
+export default defineConfig({
+  schema: './lib/db/schema.ts',
+  out: './lib/db/migrations',
+  dialect: 'postgresql',
+  dbCredentials: {
+    url: process.env.DATABASE_URL!,
+  },
+  verbose: true,
+  strict: true,
+});
+```
+
+### **Connection Management**
+```typescript
+// lib/db/drizzle.ts
+import { drizzle } from 'drizzle-orm/neon-http';
+import { neon } from '@neondatabase/serverless';
+import * as schema from './schema';
+
+// Create connection
+const sql = neon(process.env.DATABASE_URL!);
+
+// Initialize Drizzle with schema
+export const db = drizzle(sql, { schema });
+
+// Connection logging
+console.log('Connecting to database:', process.env.DATABASE_URL?.split('@')[1]);
+console.log('Drizzle client initialized successfully');
+```
+
+## **Query Patterns**
+
+### **✅ DO: Safe Query Execution**
+```typescript
+// lib/db/queries.ts
+import { db } from './drizzle';
+import { users, onboardingData } from './schema';
+import { eq, and } from 'drizzle-orm';
+
+export async function getUserByEmail(email: string) {
+  try {
+    const user = await db.query.users.findFirst({
+      where: eq(users.email, email),
+    });
+    return user;
+  } catch (error) {
+    console.error('Database query error:', error);
+    return null;
+  }
+}
+
+export async function getUserWithOnboarding(userId: string) {
+  try {
+    const result = await db
+      .select({
+        user: users,
+        onboarding: onboardingData,
+      })
+      .from(users)
+      .leftJoin(onboardingData, eq(users.id, onboardingData.userId))
+      .where(eq(users.id, userId))
+      .limit(1);
+    
+    return result[0] || null;
+  } catch (error) {
+    console.error('Database query error:', error);
+    return null;
+  }
+}
+```
+
+### **Batch Operations**
+```typescript
+export async function createUserWithOnboarding(userData: {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  onboarding?: {
+    challenges: string;
+    goals: string;
+    interests: string;
+    background: string;
+  };
+}) {
+  try {
+    const userId = crypto.randomUUID();
+    
+    // Use transaction for data consistency
+    const result = await db.transaction(async (tx) => {
+      // Create user
+      const [user] = await tx.insert(users).values({
+        id: userId,
+        email: userData.email,
+        password: userData.password,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        role: userData.role,
+      }).returning();
+
+      // Create onboarding data if provided
+      if (userData.onboarding) {
+        await tx.insert(onboardingData).values({
+          id: crypto.randomUUID(),
+          userId: userId,
+          ...userData.onboarding,
+        });
+      }
+
+      return user;
+    });
+
+    return result;
+  } catch (error) {
+    console.error('User creation error:', error);
+    throw new Error('Benutzer konnte nicht erstellt werden');
+  }
+}
+```
+
+## **Migration Patterns**
+
+### **✅ DO: Incremental Migrations**
+```sql
+-- lib/db/migrations/0001_user_roles.sql
+ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'STUDENT';
+
+-- Create index for performance
+CREATE INDEX idx_users_role ON users(role);
+```
+
+### **Migration Management**
+```typescript
+// lib/db/migrate.ts
+import { migrate } from 'drizzle-orm/neon-http/migrator';
+import { db } from './drizzle';
+
+export async function runMigrations() {
+  try {
+    console.log('Running migrations...');
+    await migrate(db, { migrationsFolder: './lib/db/migrations' });
+    console.log('Migrations completed successfully');
+  } catch (error) {
+    console.error('Migration failed:', error);
+    throw error;
+  }
+}
+```
+
+## **Seeding Data**
+
+### **✅ DO: Comprehensive Test Data**
+```typescript
+// lib/db/seed.ts
+import { db } from './drizzle';
+import { users, onboardingData } from './schema';
+import { hashPassword } from '@/lib/auth/password';
+
+export async function seedDatabase() {
+  console.log('🌱 Seeding database...');
+
+  const testUsers = [
+    {
+      id: 'admin-1',
+      email: 'admin@buildingbridges.de',
+      password: await hashPassword('admin123'),
+      firstName: 'Dr. Sarah',
+      lastName: 'Weber',
+      role: 'ADMIN',
+    },
+    {
+      id: 'student-1',
+      email: 'student1@buildingbridges.de',
+      password: await hashPassword('student123'),
+      firstName: 'Amira',
+      lastName: 'Hassan',
+      role: 'STUDENT',
+    },
+    {
+      id: 'mentor-1',
+      email: 'mentor1@buildingbridges.de',
+      password: await hashPassword('mentor123'),
+      firstName: 'Dr. Fatima',
+      lastName: 'Al-Rashid',
+      role: 'MENTOR',
+    },
+  ];
+
+  // Insert users
+  await db.insert(users).values(testUsers);
+
+  // Insert onboarding data for students
+  const studentOnboarding = [
+    {
+      id: 'onboarding-1',
+      userId: 'student-1',
+      challenges: 'Überwindung von Sprachbarrieren im akademischen Kontext',
+      goals: 'Erfolgreicher Abschluss des Psychologie-Studiums',
+      interests: 'Klinische Psychologie, Kulturpsychologie',
+      background: 'Migrationshintergrund, erste Generation Hochschulzugang',
+    },
+  ];
+
+  await db.insert(onboardingData).values(studentOnboarding);
+
+  console.log('✅ Database seeded successfully');
+}
+```
+
+## **Error Handling**
+
+### **✅ DO: Graceful Error Handling**
+```typescript
+export class DatabaseError extends Error {
+  constructor(
+    message: string,
+    public code: 'CONNECTION_ERROR' | 'QUERY_ERROR' | 'CONSTRAINT_ERROR'
+  ) {
+    super(message);
+    this.name = 'DatabaseError';
+  }
+}
+
+export function handleDatabaseError(error: unknown): never {
+  if (error instanceof Error) {
+    // PostgreSQL constraint violations
+    if (error.message.includes('duplicate key')) {
+      throw new DatabaseError('Datensatz bereits vorhanden', 'CONSTRAINT_ERROR');
+    }
+    
+    // Connection errors
+    if (error.message.includes('connect')) {
+      throw new DatabaseError('Datenbankverbindung fehlgeschlagen', 'CONNECTION_ERROR');
+    }
+  }
+  
+  console.error('Database error:', error);
+  throw new DatabaseError('Datenbankfehler aufgetreten', 'QUERY_ERROR');
+}
+```
+
+## **Performance Optimization**
+
+### **✅ DO: Efficient Queries**
+```typescript
+// Use indexes for frequently queried columns
+export const users = pgTable('users', {
+  // ... other columns
+  email: varchar('email', { length: 255 }).unique().notNull(),
+  role: varchar('role', { length: 20 }).notNull().default('STUDENT'),
+}, (table) => ({
+  emailIdx: index('idx_users_email').on(table.email),
+  roleIdx: index('idx_users_role').on(table.role),
+}));
+
+// Limit results and use pagination
+export async function getUsersByRole(role: string, limit = 10, offset = 0) {
+  return db.query.users.findMany({
+    where: eq(users.role, role),
+    limit,
+    offset,
+    orderBy: [desc(users.createdAt)],
+  });
+}
+```
+
+### **Connection Pooling**
+```typescript
+// lib/db/config.ts
+export const dbConfig = {
+  connectionString: process.env.DATABASE_URL!,
+  pool: {
+    max: 10,
+    min: 2,
+    idle: 10000,
+  },
+};
+```
+
+## **Type Safety**
+
+### **✅ DO: Generated Types**
+```typescript
+// lib/db/types.ts
+import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
+import { users, onboardingData } from './schema';
+
+export type User = InferSelectModel<typeof users>;
+export type NewUser = InferInsertModel<typeof users>;
+export type OnboardingData = InferSelectModel<typeof onboardingData>;
+export type NewOnboardingData = InferInsertModel<typeof onboardingData>;
+
+// Custom types for API responses
+export type UserWithOnboarding = User & {
+  onboarding: OnboardingData | null;
+};
+```
+
+## **Testing**
+
+### **✅ DO: Database Testing**
+```typescript
+// lib/db/test-connection.ts
+import { db } from './drizzle';
+
+export async function testDatabaseConnection() {
+  try {
+    console.log('Testing database connection...');
+    
+    // Simple query to test connection
+    const result = await db.execute(sql`SELECT 1 as test`);
+    
+    if (result.rows.length > 0) {
+      console.log('✅ Database connection successful');
+      return true;
+    }
+    
+    throw new Error('No results returned');
+  } catch (error) {
+    console.error('❌ Database connection failed:', error);
+    return false;
+  }
+}
+```
+
+## **Environment Configuration**
+
+### **✅ DO: Environment Variables**
+```bash
+# .env.local
+DATABASE_URL=postgresql://user:password@localhost:5432/building_bridges_dev
+
+# Production
+DATABASE_URL=postgresql://user:password@host:5432/building_bridges_prod?sslmode=require
+```
+
+### **Multiple Environments**
+```typescript
+// lib/db/config.ts
+export const getDatabaseUrl = () => {
+  const env = process.env.NODE_ENV;
+  
+  switch (env) {
+    case 'production':
+      return process.env.DATABASE_URL!;
+    case 'test':
+      return process.env.TEST_DATABASE_URL!;
+    default:
+      return process.env.DATABASE_URL!;
+  }
+};
+```
+description:
+globs:
+alwaysApply: false
+---

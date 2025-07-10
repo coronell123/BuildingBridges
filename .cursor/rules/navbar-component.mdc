@@ -1,0 +1,27 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Navbar Component Guide
+
+The main navigation bar for the application is defined in `components/layout/navbar.tsx`.
+
+## Features
+
+*   **Responsive**: It provides both a desktop and a mobile-friendly navigation menu. The mobile menu is a collapsible drawer.
+*   **Dynamic Content**: The links and buttons displayed in the navbar change based on whether the user is authenticated.
+    *   **Authenticated users** see a dashboard link with a dropdown for account settings and logout.
+    *   **Unauthenticated users** see "Sign In" and "Sign Up" buttons.
+*   **Animation**: The component uses [Framer Motion](https://www.framer.com/motion/) for smooth animations on the mobile menu and other elements.
+*   **Scroll Effects**: The navbar's background and shadow change dynamically as the user scrolls the page.
+
+## Structure
+
+*   **`navItems`**: An array of objects defining the main navigation links.
+*   **`useUser()` hook**: This hook from `lib/auth/index` is used to get the current user's authentication state.
+*   **Dropdown Menu**: A dropdown from `components/ui/dropdown-menu` is used for the user account menu.
+
+## Customization
+
+To add or remove navigation links, modify the `navItems` array within `components/layout/navbar.tsx`. To change the behavior for authenticated or unauthenticated users, locate the conditional rendering logic that checks the `user` object.

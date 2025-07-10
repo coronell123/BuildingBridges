@@ -1,0 +1,23 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Footer Component Guide
+
+The application's footer is defined in `components/layout/footer.tsx`. It provides navigation links, legal information, and social media connections.
+
+## Structure
+
+The footer's content is primarily driven by two data structures within the file:
+
+*   **`footerLinks`**: An array of objects that defines the columns of links in the footer. Each object has a `title` for the column and an array of `links` (each with a `label` and `href`).
+*   **`socialLinks`**: An array of objects for the social media icons, where each object contains an `Icon` component and a `href`.
+
+The component is styled with Tailwind CSS and uses icons from `lucide-react`.
+
+## Customization
+
+*   **To modify the main footer links**: Add, remove, or edit the objects within the `footerLinks` array. This is the central place to manage the primary navigation in the footer.
+*   **To change social media links**: Update the `socialLinks` array with the correct icon component and URL.
+*   **To update the copyright year**: The year is automatically updated using `new Date().getFullYear()`, so no manual changes are needed.

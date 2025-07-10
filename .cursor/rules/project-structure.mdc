@@ -1,0 +1,62 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Project Structure Guide
+
+This document outlines the structure of the Building Bridges website, a Next.js application.
+
+## Key Technologies
+
+*   **Framework**: [Next.js (App Router)](mdc:https:/nextjs.org/docs)
+*   **Language**: [TypeScript](mdc:https:/www.typescriptlang.org)
+*   **Styling**: [Tailwind CSS](mdc:https:/tailwindcss.com) with a design system.
+*   **UI Components**: Likely `shadcn/ui` or a similar library. See `components/ui`.
+*   **Authentication**: [NextAuth.js](mdc:https:/next-auth.js.org)
+*   **Database**: [Drizzle ORM](mdc:https:/orm.drizzle.team) with a [Neon](mdc:https:/neon.tech) Postgres database.
+*   **Payments**: [Stripe](mdc:https:/stripe.com)
+
+## Directory Overview
+
+### `app/`
+
+This is the main application directory, following the Next.js App Router structure.
+
+*   **`app/(dashboard)/`**: Contains pages for logged-in users.
+    *   [app/(dashboard)/layout.tsx](mdc:app/(dashboard)/layout.tsx) is the layout for the dashboard.
+*   **`app/(login)/`**: Houses authentication-related pages like sign-in, sign-up, and onboarding.
+    *   [app/(login)/actions.ts](mdc:app/(login)/actions.ts) contains server actions for authentication.
+*   **`app/api/`**: Holds API route handlers.
+*   **`app/design-system/`**: A page for viewing and testing design system components.
+*   [app/globals.css](mdc:app/globals.css): Global stylesheets.
+*   [app/layout.tsx](mdc:app/layout.tsx): The root layout for the entire application.
+
+### `components/`
+
+This directory stores the application's React components.
+
+*   **`components/layout/`**: Components related to the overall page structure, like [components/layout/navbar.tsx](mdc:components/layout/navbar.tsx) and [components/layout/footer.tsx](mdc:components/layout/footer.tsx).
+*   **`components/ui/`**: Core UI elements like [components/ui/button.tsx](mdc:components/ui/button.tsx) and [components/ui/card.tsx](mdc:components/ui/card.tsx). These are likely from a UI library like `shadcn/ui`.
+
+### `lib/`
+
+Contains the core logic and configurations.
+
+*   **`lib/auth/`**: Authentication setup.
+    *   [lib/auth/index.tsx](mdc:lib/auth/index.tsx): NextAuth.js configuration.
+    *   [lib/auth/middleware.ts](mdc:lib/auth/middleware.ts): Authentication middleware.
+*   **`lib/db/`**: Database configuration and schema.
+    *   [lib/db/schema.ts](mdc:lib/db/schema.ts): Drizzle ORM schema definitions.
+    *   [lib/db/drizzle.ts](mdc:lib/db/drizzle.ts): Drizzle client instance.
+    *   `lib/db/migrations/`: Database migration files.
+*   **`lib/design-system/`**: Configuration for the design system tokens (colors, typography, etc.).
+*   **`lib/payments/`**: Code for handling Stripe payments.
+*   [lib/utils.ts](mdc:lib/utils.ts): Shared utility functions.
+
+### Configuration Files
+
+*   [next.config.js](mdc:next.config.js): Next.js configuration.
+*   [tailwind.config.ts](mdc:tailwind.config.ts): Tailwind CSS configuration.
+*   [drizzle.config.ts](mdc:drizzle.config.ts): Drizzle ORM configuration.
+*   [middleware.ts](mdc:middleware.ts): Root middleware for the application.

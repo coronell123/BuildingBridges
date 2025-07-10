@@ -1,0 +1,230 @@
+# Next.js Deployment Best Practices
+
+## **Version Management**
+
+### **✅ DO: Use Stable Versions**
+```json
+{
+  "dependencies": {
+    "next": "14.2.18",  // Stable LTS version
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
+```
+
+### **❌ DON'T: Use Canary Versions in Production**
+```json
+{
+  "dependencies": {
+    "next": "15.0.3-canary.3"  // Causes deployment issues
+  }
+}
+```
+
+## **Configuration Patterns**
+
+### **✅ DO: Clean Next.js Config**
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // Only include stable, well-tested features
+  experimental: {
+    // Avoid experimental features in production
+  }
+};
+
+export default nextConfig;
+```
+
+### **❌ DON'T: Use Experimental Features**
+```javascript
+const nextConfig = {
+  experimental: {
+    ppr: true  // Causes build failures on Vercel
+  }
+};
+```
+
+## **React Hook Compatibility**
+
+### **✅ DO: Use React 18 Compatible Hooks**
+```typescript
+// For form state management in React 18
+import { useFormState } from 'react-dom';
+
+const [state, formAction, isPending] = useFormState<ActionState, FormData>(
+  serverAction,
+  { error: '', success: '' }
+);
+```
+
+### **❌ DON'T: Use Next.js 15 Hooks in React 18**
+```typescript
+// This doesn't exist in React 18
+import { useActionState } from 'react';  // ❌ Error
+```
+
+## **Build Verification**
+
+### **Pre-deployment Checklist**
+```bash
+# 1. Clean build artifacts
+rm -rf .next node_modules
+
+# 2. Fresh install
+npm install  # or pnpm install
+
+# 3. Test production build
+npm run build
+
+# 4. Verify all pages build successfully
+# Look for: "✓ Generating static pages (X/X)"
+
+# 5. Check for warnings/errors
+# Address any compilation issues
+```
+
+### **Common Build Issues**
+
+#### **Module Resolution Conflicts**
+```bash
+# Symptom: Mixed Next.js versions in node_modules
+Error: Cannot find module 'next/dist/server/route-modules/pages/vendored/contexts/html-context'
+
+# Solution: Clean install with correct version
+rm -rf node_modules pnpm-lock.yaml .next
+pnpm install
+```
+
+#### **Edge Runtime Warnings**
+```bash
+# Symptom: bcryptjs warnings about Node.js APIs
+A Node.js API is used (process.nextTick) which is not supported in the Edge Runtime
+
+# Solution: These are warnings, not errors - safe to ignore for deployment
+```
+
+## **Deployment Environment**
+
+### **Environment Variables**
+```bash
+# Production database connection
+DATABASE_URL=postgresql://...
+
+# Security settings
+NEXTAUTH_SECRET=your-secret-key
+NEXTAUTH_URL=https://your-domain.com
+
+# Node environment
+NODE_ENV=production
+```
+
+### **Vercel Configuration**
+```json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "framework": "nextjs"
+}
+```
+
+## **Database Integration**
+
+### **✅ DO: Test Database Connections**
+```typescript
+// Verify database connectivity during build
+console.log('Connecting to database:', process.env.DATABASE_URL?.split('@')[1]);
+```
+
+### **Connection Patterns**
+```typescript
+// Use connection pooling for production
+import { neon } from '@neondatabase/serverless';
+
+const sql = neon(process.env.DATABASE_URL!);
+```
+
+## **Error Handling**
+
+### **Graceful Degradation**
+```typescript
+// Handle database connection failures
+try {
+  const result = await db.query.users.findFirst();
+  return result;
+} catch (error) {
+  console.error('Database error:', error);
+  return null;  // Graceful fallback
+}
+```
+
+### **Redirect Handling**
+```typescript
+// NEXT_REDIRECT errors are normal behavior
+try {
+  redirect('/dashboard');
+} catch (error) {
+  // These are expected - Next.js uses errors for redirects
+  if (error.digest?.includes('NEXT_REDIRECT')) {
+    throw error;  // Re-throw redirect errors
+  }
+  console.error('Unexpected error:', error);
+}
+```
+
+## **Performance Optimization**
+
+### **Bundle Analysis**
+```bash
+# Analyze bundle size
+npm run build
+# Check output for large chunks
+
+# Route analysis
+Route (app)                              Size     First Load JS
+┌ ƒ /                                    9.38 kB         155 kB
+├ ƒ /dashboard                           153 B          87.3 kB
+```
+
+### **Static Generation**
+```typescript
+// Prefer static generation where possible
+export async function generateStaticParams() {
+  return [
+    { slug: 'about' },
+    { slug: 'contact' }
+  ];
+}
+```
+
+## **Monitoring & Debugging**
+
+### **Build Logs Analysis**
+```bash
+# Successful build indicators:
+✓ Compiled successfully
+✓ Linting and checking validity of types
+✓ Collecting page data
+✓ Generating static pages (27/27)
+✓ Finalizing page optimization
+
+# Warning signs:
+⚠ Compiled with warnings
+❌ Failed to compile
+```
+
+### **Runtime Monitoring**
+```typescript
+// Add performance monitoring
+export default function Page() {
+  useEffect(() => {
+    console.log('Page rendered successfully');
+  }, []);
+}
+```
+description:
+globs:
+alwaysApply: false
+---
