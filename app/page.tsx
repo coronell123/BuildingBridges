@@ -118,7 +118,7 @@ export default function HomePage() {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="border-2 border-white text-purple-600 hover:bg-white hover:text-purple-600 px-8 py-4 text-lg font-semibold shadow-2xl backdrop-blur-sm"
+                className="border-2 border-white text-white hover:bg-white hover:text-purple-600 px-8 py-4 text-lg font-semibold shadow-2xl backdrop-blur-sm"
                 style={{
                   boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
                   textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
@@ -443,7 +443,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/contact">
-                <Button size="lg" variant="outline" className="border-white/40 text-purple-600 hover:bg-white/10 px-10 py-5 text-xl font-semibold rounded-full transition-all duration-300 transform hover:scale-105">
+                <Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10 px-10 py-5 text-xl font-semibold rounded-full transition-all duration-300 transform hover:scale-105">
                   Kontakt aufnehmen
                 </Button>
               </Link>

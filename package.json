@@ -4,7 +4,6 @@
     "dev": "next dev",
     "build": "next build",
     "build:clean": "rm -rf .next && next build",
-    "build:production": "npx tsx scripts/setup-production-db.ts && next build",
     "start": "next start",
     "lint": "next lint",
     "db:setup": "npx tsx lib/db/setup.ts",
