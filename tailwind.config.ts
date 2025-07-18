@@ -102,9 +102,8 @@ const config: Config = {
     },
   },
   plugins: [
-    require('tailwindcss-react-aria-components'),
-    require('tailwindcss-animate'),
     require('@tailwindcss/typography'),
+    require('tailwindcss-animate'),
   ],
 };
 
