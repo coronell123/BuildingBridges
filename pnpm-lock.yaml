@@ -47,9 +47,6 @@ importers:
       '@tailwindcss/typography':
         specifier: ^0.5.16
         version: 0.5.16(tailwindcss@3.4.17)
-      '@types/bcryptjs':
-        specifier: ^3.0.0
-        version: 3.0.0
       '@types/node':
         specifier: ^24.2.0
         version: 24.2.0
@@ -59,6 +56,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.1.7
         version: 19.1.7(@types/react@19.1.9)
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.21(postcss@8.5.6)
@@ -182,10 +182,6 @@ importers:
       zod:
         specifier: ^3.23.8
         version: 3.25.75
-    devDependencies:
-      '@types/ws':
-        specifier: ^8.18.1
-        version: 8.18.1
 
 packages:
 
@@ -1192,10 +1188,6 @@ packages:
 
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
-
-  '@types/bcryptjs@3.0.0':
-    resolution: {integrity: sha512-WRZOuCuaz8UcZZE4R5HXTco2goQSI2XxjGY3hbM/xDvwmqFWd4ivooImsMx65OKM6CtNKbnZ5YL+YwAwK7c1dg==}
-    deprecated: This is a stub types definition. bcryptjs provides its own type definitions, so you do not need this installed.
 
   '@types/cookie@0.6.0':
     resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
@@ -3813,10 +3805,6 @@ snapshots:
       - supports-color
 
   '@tokenizer/token@0.3.0': {}
-
-  '@types/bcryptjs@3.0.0':
-    dependencies:
-      bcryptjs: 2.4.3
 
   '@types/cookie@0.6.0': {}
 

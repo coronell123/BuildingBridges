@@ -35,10 +35,10 @@
     "@radix-ui/react-radio-group": "^1.2.1",
     "@radix-ui/react-slot": "^1.1.0",
     "@tailwindcss/typography": "^0.5.16",
-    "@types/bcryptjs": "^3.0.0",
     "@types/node": "^24.2.0",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
+    "@types/ws": "^8.18.1",
     "autoprefixer": "^10.4.20",
     "bcryptjs": "^2.4.3",
     "boxen": "^8.0.1",
@@ -80,9 +80,6 @@
     "typescript": "^5.9.2",
     "ws": "^8.18.2",
     "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@types/ws": "^8.18.1"
   },
   "type": "module"
 }
