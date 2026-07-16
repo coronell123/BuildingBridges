@@ -10,40 +10,46 @@ type Logo = {
   scale?: number; // optional visual adjustment for mixed-aspect assets
 };
 
+const DEFAULT_FUNDING_TEXT =
+  'Das Projekt Building Bridges wird im Rahmen des Programms „Integration durch Bildung" durch das Bundesministerium für Bildung, Familie, Senioren, Frauen und Jugend und die Europäische Union über den Europäischen Sozialfonds Plus (ESF Plus) gefördert.';
+const DEFAULT_PARTNERS_LOGO = '/workshops/updated/Partners%20Logo.jpg';
+
 export function FundingBanner({
   heading = 'Gefördert durch',
-  logos,
+  logos: _logos,
+  description = DEFAULT_FUNDING_TEXT,
+  combinedLogoSrc = DEFAULT_PARTNERS_LOGO,
 }: {
   heading?: string;
-  logos: Logo[];
+  logos?: Logo[];
+  description?: string;
+  combinedLogoSrc?: string;
 }) {
   return (
     <section className="py-10">
       <div className="container mx-auto px-4">
         <div className="w-full flex justify-center">
-          <div className="inline-block">
+          <div className="w-full max-w-6xl">
             <h3 className="text-gray-900 text-2xl md:text-3xl font-bold mb-3 text-center">
               {heading}
             </h3>
-            <div className="rounded-2xl border border-gray-200 bg-white px-2 md:px-3 py-6 md:py-7 shadow-sm inline-block">
-              <div className="flex flex-wrap gap-3 md:gap-4 items-center justify-center">
-                {logos.map((logo) => (
-                  <div
-                    key={logo.src}
-                    className="relative flex items-center justify-center"
-                    style={{ height: 70, width: 220 }}
-                  >
-                    <Image
-                      src={logo.src}
-                      alt={logo.alt}
-                      width={220}
-                      height={70}
-                      className="object-contain"
-                      priority={false}
-                      style={logo.scale ? ({ transform: `scale(${logo.scale})` } as any) : undefined}
-                    />
-                  </div>
-                ))}
+            <div className="rounded-2xl border border-gray-200 bg-white px-5 md:px-7 py-6 md:py-7 shadow-sm">
+              <div className="flex flex-col gap-5">
+                {description ? (
+                  <p className="mx-auto max-w-4xl text-center text-xs leading-relaxed text-gray-700 md:text-sm">
+                    {description}
+                  </p>
+                ) : null}
+                <div className="relative mx-auto w-full overflow-hidden rounded-xl bg-white">
+                  <Image
+                    src={combinedLogoSrc}
+                    alt="Building Bridges funding and partner logos"
+                    width={1200}
+                    height={190}
+                    className="h-auto w-full object-contain"
+                    priority={false}
+                  />
+                </div>
               </div>
             </div>
           </div>
