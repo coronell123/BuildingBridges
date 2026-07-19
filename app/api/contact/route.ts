@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
 const CONTACT_RECIPIENT = 'sumerasajid141@gmail.com';
-const CONTACT_SENDER = 'onboarding@resend.dev';
 
 export const runtime = 'nodejs';
 
@@ -49,8 +48,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.RESEND_API_KEY) {
-      console.error('Missing RESEND_API_KEY for contact form email delivery.');
+    const requiredSmtpEnv = ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'EMAIL_FROM'] as const;
+    const missingSmtpEnv = requiredSmtpEnv.filter((key) => !process.env[key]);
+
+    if (missingSmtpEnv.length > 0) {
+      console.error('Missing SMTP environment variables for contact form email delivery:', missingSmtpEnv);
       return NextResponse.json(
         { success: false, message: 'Email delivery is not configured.' },
         { status: 500 }
@@ -83,10 +85,19 @@ export async function POST(request: NextRequest) {
       <p>${escapeHtml(message).replace(/\n/g, '<br />')}</p>
     `;
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    const smtpPort = Number(process.env.SMTP_PORT || 587);
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
 
-    const { error } = await resend.emails.send({
-      from: CONTACT_SENDER,
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
       to: CONTACT_RECIPIENT,
       replyTo: email,
       subject,
@@ -94,8 +105,8 @@ export async function POST(request: NextRequest) {
       html,
     });
 
-    if (error) {
-      console.error('Resend contact email error:', error);
+    if (info.rejected.length > 0) {
+      console.error('SMTP contact email rejected by recipient server:', info.rejected);
       return NextResponse.json(
         { success: false, message: 'Failed to send message.' },
         { status: 500 }
