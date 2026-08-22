@@ -38,6 +38,27 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
+function getSafeDbTargetFromEnv() {
+  const source = process.env.DATABASE_URL
+    ? 'DATABASE_URL'
+    : process.env.POSTGRES_URL
+      ? 'POSTGRES_URL'
+      : 'unset';
+  const rawUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+
+  if (!rawUrl) {
+    return { source, hostname: null, database: null };
+  }
+
+  try {
+    const url = new URL(rawUrl);
+    const database = url.pathname.replace(/^\//, '').split('/')[0] || null;
+    return { source, hostname: url.hostname || null, database };
+  } catch {
+    return { source, hostname: null, database: null };
+  }
+}
+
 function parseBody(body: StorySubmitBody): { ok: true; data: ValidStorySubmitBody } | { ok: false; error: string } {
   if (!isNonEmptyString(body.sessionId)) return { ok: false, error: 'sessionId is required.' };
   if (typeof body.consent !== 'boolean') return { ok: false, error: 'consent must be a boolean.' };
@@ -92,6 +113,21 @@ export async function POST(request: NextRequest) {
     }
 
     const data = parsed.data;
+
+    const envTarget = getSafeDbTargetFromEnv();
+    console.info('[stories/submit diagnostic] env connection target', {
+      source: envTarget.source,
+      hostname: envTarget.hostname,
+      database: envTarget.database,
+    });
+
+    const runtimeContext = await db.execute<{ current_database: string; current_schema: string }>(sql`
+      SELECT current_database() AS current_database, current_schema() AS current_schema
+    `);
+    console.info('[stories/submit diagnostic] runtime database context', {
+      current_database: runtimeContext[0]?.current_database ?? null,
+      current_schema: runtimeContext[0]?.current_schema ?? null,
+    });
 
     const inserted = await db.execute<{ id: number }>(sql`
       INSERT INTO stories (
