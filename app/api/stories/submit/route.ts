@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { stories } from '@/lib/db/schema';
 
 export const runtime = 'nodejs';
 
@@ -93,20 +93,36 @@ export async function POST(request: NextRequest) {
 
     const data = parsed.data;
 
-    const [createdStory] = await db
-      .insert(stories)
-      .values({
-        sessionId: data.sessionId,
-        title: data.story.title,
-        summary: data.story.summary,
-        timeline: data.story.timeline,
-        quotes: data.story.quotes,
-        empowermentMessage: data.story.empowermentMessage,
-        rawConversation: data.conversation,
-        consentGiven: data.consent,
-        status: 'pending_review',
-      })
-      .returning({ id: stories.id });
+    const inserted = await db.execute<{ id: number }>(sql`
+      INSERT INTO stories (
+        session_id,
+        title,
+        summary,
+        timeline,
+        quotes,
+        empowerment_message,
+        raw_conversation,
+        consent_given,
+        status
+      ) VALUES (
+        ${data.sessionId},
+        ${data.story.title},
+        ${data.story.summary},
+        CAST(${JSON.stringify(data.story.timeline)} AS jsonb),
+        CAST(${JSON.stringify(data.story.quotes)} AS jsonb),
+        ${data.story.empowermentMessage},
+        CAST(${JSON.stringify(data.conversation)} AS jsonb),
+        ${data.consent},
+        ${'pending_review'}
+      )
+      RETURNING id
+    `);
+
+    const createdStory = inserted[0];
+
+    if (!createdStory?.id) {
+      return NextResponse.json({ success: false, message: 'Failed to submit story.' }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, id: createdStory.id });
   } catch (error) {
