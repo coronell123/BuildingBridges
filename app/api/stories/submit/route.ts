@@ -121,12 +121,26 @@ export async function POST(request: NextRequest) {
       database: envTarget.database,
     });
 
-    const runtimeContext = await db.execute<{ current_database: string; current_schema: string }>(sql`
-      SELECT current_database() AS current_database, current_schema() AS current_schema
+    const runtimeContext = await db.execute<{
+      current_user: string;
+      current_database: string;
+      current_schema: string;
+      search_path: string;
+      public_stories_regclass: string | null;
+    }>(sql`
+      SELECT
+        current_user AS current_user,
+        current_database() AS current_database,
+        current_schema() AS current_schema,
+        current_setting('search_path') AS search_path,
+        to_regclass('public.stories') AS public_stories_regclass
     `);
     console.info('[stories/submit diagnostic] runtime database context', {
+      current_user: runtimeContext[0]?.current_user ?? null,
       current_database: runtimeContext[0]?.current_database ?? null,
       current_schema: runtimeContext[0]?.current_schema ?? null,
+      search_path: runtimeContext[0]?.search_path ?? null,
+      public_stories_regclass: runtimeContext[0]?.public_stories_regclass ?? null,
     });
 
     const inserted = await db.execute<{ id: number }>(sql`
