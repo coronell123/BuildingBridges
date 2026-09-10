@@ -4,17 +4,17 @@ import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import { StatCard } from '@/components/dashboard-portal/StatCard';
 import { ApprovalTable } from '@/components/dashboard-portal/ApprovalTable';
-import { StoryReviewTable } from '@/components/dashboard-portal/StoryReviewTable';
+import { StoryReviewTable, type StoryReviewRow } from '@/components/dashboard-portal/StoryReviewTable';
 import {
   dummyPendingUsers,
-  dummyStoriesForReview,
 } from '@/components/dashboard-portal/dashboard-copy';
 
 export type AdminPortalHomeProps = {
   greetingName: string;
+  storyRows: StoryReviewRow[];
 };
 
-export function AdminPortalHome({ greetingName }: AdminPortalHomeProps) {
+export function AdminPortalHome({ greetingName, storyRows }: AdminPortalHomeProps) {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
@@ -33,11 +33,11 @@ export function AdminPortalHome({ greetingName }: AdminPortalHomeProps) {
       <section className="grid gap-4 md:grid-cols-3" aria-label="Key statistics">
         <StatCard title="Total Users" value={128} hint="Including mentors, mentees, and researchers." />
         <StatCard title="Pending Approvals" value={8} hint="Profiles waiting for moderator review." />
-        <StatCard title="Stories Submitted" value={15} hint="Stories currently in moderation." />
+        <StatCard title="Stories Submitted" value={storyRows.length} hint="Stories currently in moderation." />
       </section>
 
       <ApprovalTable rows={[...dummyPendingUsers]} />
-      <StoryReviewTable rows={[...dummyStoriesForReview]} />
+      <StoryReviewTable rows={storyRows} />
 
       <div className="rounded-2xl border border-[rgba(145,82,255,0.14)] bg-gradient-to-br from-white via-[#FAF8FF] to-emerald-50/30 p-6 shadow-[0_10px_36px_rgba(145,82,255,0.09)]">
         <h2 className="font-lora text-lg font-semibold text-[#1A1033]">Safety & care</h2>

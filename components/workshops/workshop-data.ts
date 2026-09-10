@@ -78,6 +78,8 @@ const UPDATED_FLYERS = {
   mentoringJohannaEck: `${UPDATED_FLYER_BASE}/2.3.26%20Building%20Bridges%20-%20Johanna%20eck%20Flyer_page-0001.jpg`,
   fruehlingsfest: `${UPDATED_FLYER_BASE}/20260326%20Fr%C3%BChlingsfest%20M%C3%84DEA%20x%20Building%20Bridges%2020.03.2026_page-0001.jpg`,
   selfCare: `${UPDATED_FLYER_BASE}/20260613%20Self%20Care%20Workshop%20Building%20Bridges_page-0001.jpg`,
+  juliTp3En: `${UPDATED_FLYER_BASE}/31%20Juli%20eng.jpg`,
+  juliTp3De: `${UPDATED_FLYER_BASE}/31%20Juli%20German.jpg`,
 };
 
 function toWorkshopItem(source: WorkshopSource, lang: AppLanguage): WorkshopItem {
@@ -98,125 +100,11 @@ function toWorkshopItem(source: WorkshopSource, lang: AppLanguage): WorkshopItem
   };
 }
 
-const featuredSource: WorkshopSource = {
-  id: 'featured-online-workshop-tp3',
-  title: {
-    en: 'Online workshop: Evaluating storytelling formats with mentors',
-    de: 'Online-Workshop: Storytelling-Formate mit Mentor:innen evaluieren',
-  },
-  description: {
-    en: 'Help shape the future of the Building Bridges storytelling platform: explore five storytelling prototypes, share impressions on comprehensibility, emotional connection and usability, and co-create ideas for an accessible, empowering platform.',
-    de: 'Gestalte die Zukunft der Building-Bridges-Storytelling-Plattform mit: Erkunde fünf Storytelling-Prototypen, teile Eindrücke zu Verständlichkeit, emotionaler Verbindung und Nutzbarkeit und entwickle Ideen für eine zugängliche, empowernde Plattform.',
-  },
-  date: '31.07.2026',
-  time: { en: 'TBD · 90 minutes', de: 'Uhrzeit folgt · 90 Minuten' },
-  location: { en: 'Zoom + Miro', de: 'Zoom + Miro' },
-  mode: 'Online',
-  category: 'Research',
-  image: {
-    en: '/workshops/updated/31%20Juli%20eng.jpg',
-    de: '/workshops/updated/31%20Juli%20German.jpg',
-  },
-  registrationUrl: 'https://forms.gle/19nHSdjAbFwFXxgq6',
-  tags: {
-    en: ['Upcoming', 'Online', 'TP3', 'Storytelling'],
-    de: ['Bevorstehend', 'Online', 'TP3', 'Storytelling'],
-  },
-};
+/** Set when a new upcoming workshop should be featured as “Next up”. */
+const featuredSource: WorkshopSource | null = null;
 
-const feedSources: WorkshopSource[] = [
-  featuredSource,
-  {
-    id: 'individual-mentoring',
-    title: { en: 'Individual mentoring', de: 'Individuelles Mentoring' },
-    description: {
-      en: 'Mentoring programme from September 2025 to September 2026 with exchange, self-care, skills training, and empowerment workshops for girls and young FLINTA of Colour.',
-      de: 'Mentoring-Programm von September 2025 bis September 2026 mit Austausch, Self-Care, Skillstraining und Empowerment-Workshops für Mädchen und junge FLINTA of Colour.',
-    },
-    date: '09.2025 - 09.2026',
-    time: { en: 'Flexible', de: 'Flexibel' },
-    location: { en: 'MÄDEA', de: 'MÄDEA' },
-    mode: 'Hybrid',
-    category: 'Mentoring',
-    image: UPDATED_FLYERS.mentoringProgramme,
-    tags: { en: ['Mentoring', 'Empowerment'], de: ['Mentoring', 'Empowerment'] },
-  },
-  {
-    id: 'mentoring-workshop-johanna-eck',
-    title: { en: 'Mentoring workshop — Johanna-Eck', de: 'Mentoring-Workshop — Johanna-Eck' },
-    description: {
-      en: 'Workshop introducing the mentoring offer and reflecting on what topics participants want to explore through Building Bridges one-to-one mentoring.',
-      de: 'Workshop mit kurzer Einführung ins Mentoring und Austausch darüber, welche Themen die Teilnehmenden im 1:1-Angebot von Building Bridges nutzen möchten.',
-    },
-    date: '02.03.2026',
-    time: { en: '13:30 - 16:00', de: '13:30 - 16:00 Uhr' },
-    location: { en: 'Johanna-Eck Schule', de: 'Johanna-Eck-Schule' },
-    mode: 'In Person',
-    category: 'Workshop',
-    image: UPDATED_FLYERS.mentoringJohannaEck,
-    tags: { en: ['Mentoring', 'Community'], de: ['Mentoring', 'Community'] },
-  },
-  {
-    id: 'johanna-eck-intro-workshop',
-    title: { en: 'Kick-off workshop — Johanna-Eck', de: 'Auftaktworkshop — Johanna-Eck' },
-    description: {
-      en: 'First workshop with Johanna-Eck-Schule at anigo space, focused on getting to know the mentors and students and discussing discrimination and empowerment.',
-      de: 'Erster Workshop mit der Johanna-Eck-Schule im anigo space zum Kennenlernen der Mentor:innen und Schülerinnen sowie zum Austausch über (Anti-)Diskriminierung und Empowerment.',
-    },
-    date: '08.10.2025',
-    time: { en: '12:30 - 16:00', de: '12:30 - 16:00 Uhr' },
-    location: { en: 'anigo space Berlin', de: 'anigo space Berlin' },
-    mode: 'In Person',
-    category: 'Workshop',
-    image: UPDATED_FLYERS.johannaEckIntro,
-    tags: { en: ['Empowerment', 'Anti-discrimination'], de: ['Empowerment', 'Antidiskriminierung'] },
-  },
-  {
-    id: 'perlen-power-johanna-eck',
-    title: { en: 'Perlen & Power — Johanna-Eck', de: 'Perlen & Power — Johanna-Eck' },
-    description: {
-      en: 'Self-care workshop where mentors and participants made pearl necklaces and exchanged around self-care.',
-      de: 'Self-Care-Workshop, in dem die Mentor:innen gemeinsam mit den Teilnehmerinnen Perlenketten gestaltet und sich über Selbstfürsorge ausgetauscht haben.',
-    },
-    date: '18.12.2025',
-    time: { en: '13:00 - 16:00', de: '13:00 - 16:00 Uhr' },
-    location: { en: 'Johanna-Eck Schule', de: 'Johanna-Eck-Schule' },
-    mode: 'In Person',
-    category: 'Community',
-    image: UPDATED_FLYERS.perlenPower,
-    tags: { en: ['Self-care', 'Empowerment'], de: ['Self-Care', 'Empowerment'] },
-  },
-  {
-    id: 'get-together',
-    title: { en: 'Get Together', de: 'Get Together' },
-    description: {
-      en: 'First get-together used as the postponed kick-off event for mentoring matching and vision work with Mary Ivic.',
-      de: 'Das erste Get Together wurde als verschobene Auftaktveranstaltung zur Mentoring-Zuordnung und Visionsarbeit mit Mary Ivic genutzt.',
-    },
-    date: '09.12.2025',
-    time: { en: 'Time TBD', de: 'Uhrzeit folgt' },
-    location: { en: 'MÄDEA', de: 'MÄDEA' },
-    mode: 'In Person',
-    category: 'Networking',
-    image: UPDATED_FLYERS.eventTemplate,
-    tags: { en: ['Mentoring', 'Community'], de: ['Mentoring', 'Community'] },
-  },
-  {
-    id: 'fruehlingsfest',
-    title: { en: 'Frühlingsfest', de: 'Frühlingsfest' },
-    description: {
-      en: 'Building Bridges joined the spring festival organized with MÄDEA, using the Perlen & Power concept for a stand with interested girls and young FLINTA.',
-      de: 'Building Bridges nahm am gemeinsam mit MÄDEA organisierten Frühlingsfest teil und nutzte das Konzept Perlen & Power für einen Stand mit interessierten Mädchen und jungen FLINTA.',
-    },
-    date: '20.03.2026',
-    time: { en: 'from 16:00', de: 'ab 16:00 Uhr' },
-    location: { en: 'MÄDEA', de: 'MÄDEA' },
-    mode: 'In Person',
-    category: 'Community',
-    image: UPDATED_FLYERS.fruehlingsfest,
-    tags: { en: ['Self-care'], de: ['Self-Care'] },
-  },
-];
+/** Upcoming / ongoing sessions shown in the workshops feed. Empty while none are scheduled. */
+const feedSources: WorkshopSource[] = [];
 
 type ArchiveSource = {
   id: string;
@@ -224,11 +112,23 @@ type ArchiveSource = {
   type: L<string>;
   date: string;
   status: L<string>;
-  image: string;
-  href: string;
+  image: string | L<string>;
+  href: string | L<string>;
 };
 
 const archiveSources: ArchiveSource[] = [
+  {
+    id: 'archive-online-workshop-tp3',
+    title: {
+      en: 'Online workshop: Evaluating storytelling formats with mentors',
+      de: 'Online-Workshop: Storytelling-Formate mit Mentor:innen evaluieren',
+    },
+    type: { en: 'Research workshop', de: 'Forschungs-Workshop' },
+    date: '31.07.2026',
+    status: { en: 'Past workshop', de: 'Vergangener Workshop' },
+    image: { en: UPDATED_FLYERS.juliTp3En, de: UPDATED_FLYERS.juliTp3De },
+    href: { en: UPDATED_FLYERS.juliTp3En, de: UPDATED_FLYERS.juliTp3De },
+  },
   {
     id: 'archive-self-care',
     title: { en: 'Self-Care Workshop', de: 'Self-Care-Workshop' },
@@ -339,8 +239,8 @@ const reflectionSources: { id: string; quote: L<string>; role: L<string> }[] = [
   },
 ];
 
-export function getFeaturedWorkshop(lang: AppLanguage): WorkshopItem {
-  return toWorkshopItem(featuredSource, lang);
+export function getFeaturedWorkshop(lang: AppLanguage): WorkshopItem | null {
+  return featuredSource ? toWorkshopItem(featuredSource, lang) : null;
 }
 
 export type UpcomingWorkshopAlertData = {
@@ -353,8 +253,9 @@ export type UpcomingWorkshopAlertData = {
   dismissLabel: string;
 };
 
-/** Copy for the upcoming-workshop alert. */
-export function getUpcomingWorkshopAlert(lang: AppLanguage): UpcomingWorkshopAlertData {
+/** Copy for the upcoming-workshop alert. Returns null when nothing is featured. */
+export function getUpcomingWorkshopAlert(lang: AppLanguage): UpcomingWorkshopAlertData | null {
+  if (!featuredSource) return null;
   const w = toWorkshopItem(featuredSource, lang);
   if (lang === 'de') {
     return {
@@ -389,8 +290,8 @@ export function getArchiveItems(lang: AppLanguage): ArchiveItem[] {
     type: pick(s.type, lang),
     date: s.date,
     status: pick(s.status, lang),
-    image: s.image,
-    href: s.href,
+    image: pickMaybeLocalized(s.image, lang),
+    href: pickMaybeLocalized(s.href, lang),
   }));
 }
 
@@ -408,6 +309,8 @@ export type WorkshopPageLabels = {
   intro: string;
   feedEyebrow: string;
   feedTitle: string;
+  feedEmptyTitle: string;
+  feedEmptyBody: string;
   archiveEyebrow: string;
   archiveTitle: string;
   reflectionEyebrow: string;
@@ -421,8 +324,11 @@ export function getWorkshopPageLabels(lang: AppLanguage): WorkshopPageLabels {
         title: 'Workshops & Community-Lernen',
         intro:
           'Mentoring, Empowerment, Forschungsaustausch und inklusives Community-Lernen — mit Storytelling im Mittelpunkt.',
-        feedEyebrow: 'Workshop-Übersicht',
-        feedTitle: 'Bevorstehende & laufende Formate',
+        feedEyebrow: 'Kommende Termine',
+        feedTitle: 'Bevorstehende Workshops',
+        feedEmptyTitle: 'Zurzeit keine kommenden Workshops',
+        feedEmptyBody:
+          'Neue Termine erscheinen hier, sobald sie feststehen. Vergangene Workshops findest du im Archiv.',
         archiveEyebrow: 'Archiv',
         archiveTitle: 'Workshop-Archiv',
         reflectionEyebrow: 'Stimmen aus der Community',
@@ -433,8 +339,10 @@ export function getWorkshopPageLabels(lang: AppLanguage): WorkshopPageLabels {
         title: 'Workshops & Community Learning',
         intro:
           'A storytelling-focused space for mentoring, empowerment, research exchange, and inclusive community building.',
-        feedEyebrow: 'Workshop feed',
-        feedTitle: 'Browse upcoming sessions',
+        feedEyebrow: 'Upcoming',
+        feedTitle: 'Upcoming sessions',
+        feedEmptyTitle: 'No upcoming workshops right now',
+        feedEmptyBody: 'New dates will be announced here. You can browse past workshops in the archive below.',
         archiveEyebrow: 'Archive',
         archiveTitle: 'Curated workshop archive',
         reflectionEyebrow: 'Community reflection',

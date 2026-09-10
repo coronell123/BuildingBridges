@@ -40,6 +40,7 @@ const publicPaths = [
   '/glossary',
   '/story-tool',
   '/stories',
+  '/videos',
   '/tos',
   '/privacy-policy',
   '/api/webhooks/stripe',
@@ -51,7 +52,7 @@ const isPublicPath = (path: string) => {
   return publicPaths.some(publicPath => 
     path === publicPath || 
     path.startsWith(`${publicPath}/`) ||
-    path.match(/\.(jpg|jpeg|png|webp|svg|ico|css|js)$/)
+    path.match(/\.(jpg|jpeg|png|webp|svg|ico|css|js|mp4|webm|html)$/)
   );
 };
 

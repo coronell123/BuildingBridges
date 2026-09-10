@@ -8,6 +8,7 @@ import {
   uuid,
   pgEnum,
   boolean,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import type { AdapterAccount } from "@auth/core/adapters";
@@ -138,6 +139,21 @@ export const onboardingData = pgTable('onboarding_data', {
   completed: boolean('completed').default(false),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// Stories submitted by interview automation and co-creation flows
+export const stories = pgTable('stories', {
+  id: serial('id').primaryKey(),
+  sessionId: text('session_id').notNull(),
+  title: text('title').notNull(),
+  summary: text('summary').notNull(),
+  timeline: jsonb('timeline').$type<unknown[]>().notNull(),
+  quotes: jsonb('quotes').$type<unknown[]>().notNull(),
+  empowermentMessage: text('empowerment_message').notNull(),
+  rawConversation: jsonb('raw_conversation').$type<unknown[]>().notNull(),
+  consentGiven: boolean('consent_given').notNull().default(false),
+  status: text('status').notNull().default('pending_review'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
 // Mentoring matches
@@ -310,6 +326,8 @@ export type Invitation = typeof invitations.$inferSelect;
 export type NewInvitation = typeof invitations.$inferInsert;
 export type OnboardingData = typeof onboardingData.$inferSelect;
 export type NewOnboardingData = typeof onboardingData.$inferInsert;
+export type Story = typeof stories.$inferSelect;
+export type NewStory = typeof stories.$inferInsert;
 export type MentoringMatch = typeof mentoringMatches.$inferSelect;
 export type NewMentoringMatch = typeof mentoringMatches.$inferInsert;
 export type AIRecommendation = typeof aiRecommendations.$inferSelect;

@@ -1,9 +1,23 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { startTransition, useCallback, useRef, useState } from 'react';
+import { submitStoryToolStory } from '@/lib/actions/story-tool';
 import { useLanguage } from '@/lib/hooks/useLanguage';
 
 type Chapter = { label: string; icon: string; text: string; quote: string };
+type SubmissionStatus = { type: 'success' | 'error'; message: string } | null;
+
+function createStorySessionId() {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return `story-tool-${crypto.randomUUID()}`;
+  }
+  return `story-tool-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function getStoryTitle(transcript: string, fallbackTitle: string) {
+  const words = transcript.trim().split(/\s+/).filter(Boolean).slice(0, 6);
+  return words.length > 0 ? words.join(' ') : fallbackTitle;
+}
 
 function parseTranscriptIntoChapters(
   transcript: string,
@@ -66,7 +80,11 @@ export function AiStoryTool() {
   const [storyType, setStoryType] = useState('mentor');
   const [format, setFormat] = useState<'immersive' | 'constellation'>('immersive');
   const [litRow, setLitRow] = useState<number | null>(null);
+  const [consentGiven, setConsentGiven] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sessionIdRef = useRef('');
 
   const charLabel = L(`${transcript.length.toLocaleString()} characters`, `${transcript.length.toLocaleString()} Zeichen`);
 
@@ -89,6 +107,8 @@ export function AiStoryTool() {
       return;
     }
     setStep(3);
+    setConsentGiven(false);
+    setSubmissionStatus(null);
     const bar = document.getElementById('ai-gen-bar');
     const statusEl = document.getElementById('ai-gen-status');
     const statuses = isDe
@@ -145,6 +165,117 @@ export function AiStoryTool() {
     return L('Her <em>Story</em>', 'Ihre <em>Story</em>');
   };
 
+  const handleSubmitForReview = useCallback(() => {
+    if (isSubmitting || submissionStatus?.type === 'success') return;
+
+    if (!consentGiven) {
+      setSubmissionStatus({
+        type: 'error',
+        message: L(
+          'Please confirm consent before submitting this story for review.',
+          'Bitte bestätige die Zustimmung, bevor du diese Story zur Prüfung einreichst.'
+        ),
+      });
+      return;
+    }
+
+    const trimmedTranscript = transcript.trim();
+    if (!trimmedTranscript) {
+      setSubmissionStatus({
+        type: 'error',
+        message: L('Please paste a transcript before submitting.', 'Bitte füge vor dem Einreichen ein Transkript ein.'),
+      });
+      return;
+    }
+
+    if (chapters.length === 0) {
+      setSubmissionStatus({
+        type: 'error',
+        message: L('Please generate the story preview before submitting.', 'Bitte generiere zuerst die Story-Vorschau.'),
+      });
+      return;
+    }
+
+    const summary = chapters[0]?.text.trim() ?? '';
+    const empowermentMessage = chapters[chapters.length - 1]?.text.trim() ?? '';
+
+    if (!summary || !empowermentMessage) {
+      setSubmissionStatus({
+        type: 'error',
+        message: L(
+          'The generated story is missing a summary or empowerment message.',
+          'Der generierten Story fehlt eine Zusammenfassung oder Empowerment-Botschaft.'
+        ),
+      });
+      return;
+    }
+
+    if (!sessionIdRef.current) {
+      sessionIdRef.current = createStorySessionId();
+    }
+
+    const payload = {
+      sessionId: sessionIdRef.current,
+      consent: true,
+      story: {
+        title: getStoryTitle(trimmedTranscript, L('Her Story', 'Ihre Geschichte')),
+        summary,
+        timeline: chapters.map((chapter, index) => ({
+          order: index + 1,
+          label: chapter.label,
+          icon: chapter.icon,
+          text: chapter.text,
+          quote: chapter.quote,
+        })),
+        quotes: chapters
+          .map((chapter) => ({
+            label: chapter.label,
+            text: chapter.quote.trim(),
+          }))
+          .filter((quote) => quote.text.length > 0),
+        empowermentMessage,
+      },
+      conversation: [
+        {
+          type: 'transcript',
+          storyType,
+          text: trimmedTranscript,
+        },
+      ],
+    };
+
+    setIsSubmitting(true);
+    setSubmissionStatus(null);
+
+    startTransition(() => {
+      void submitStoryToolStory(payload)
+        .then((result) => {
+          setSubmissionStatus({
+            type: result.success ? 'success' : 'error',
+            message: result.success
+              ? L(
+                  'Your story has been submitted for human review. It is not public yet.',
+                  'Deine Story wurde zur menschlichen Prüfung eingereicht. Sie ist noch nicht öffentlich.'
+                )
+              : result.message,
+          });
+        })
+        .catch((error) => {
+          console.error('Story tool submission failed:', error);
+          setSubmissionStatus({
+            type: 'error',
+            message: L(
+              'We could not submit the story right now. Please try again later.',
+              'Die Story konnte gerade nicht eingereicht werden. Bitte versuche es später erneut.'
+            ),
+          });
+        })
+        .finally(() => {
+          setIsSubmitting(false);
+        });
+    });
+  }, [chapters, consentGiven, isDe, isSubmitting, storyType, submissionStatus?.type, transcript]);
+
   return (
     <div className="ai-gen-wrapper mt-20 border-t border-white/10 pt-16" id="ai-story-tool">
       <div className="mb-8">
@@ -169,8 +300,8 @@ export function AiStoryTool() {
         </h3>
         <p className="mt-2 max-w-[560px] text-[0.88rem] leading-relaxed text-white/50">
           {L(
-            'Paste a raw interview transcript, configure the story settings, and preview how it looks in two storytelling formats. API integration coming soon.',
-            'Füge ein Interview-Transkript ein, konfiguriere die Story-Einstellungen und sieh dir zwei Storytelling-Formate in der Vorschau an. API-Anbindung folgt in Kürze.'
+            'Paste a raw interview transcript, configure the story settings, preview how it looks, and submit it for human review when you are ready.',
+            'Füge ein Interview-Transkript ein, konfiguriere die Story-Einstellungen, sieh dir die Vorschau an und reiche sie ein, wenn du bereit bist.'
           )}
         </p>
       </div>
@@ -221,14 +352,24 @@ export function AiStoryTool() {
               className="min-h-[200px] w-full resize-y rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 font-primary text-[0.88rem] leading-relaxed text-white outline-none placeholder:text-white/20 focus:border-[rgba(145,82,255,0.5)]"
               placeholder={L('Paste the full interview transcript here…', 'Vollständiges Interview-Transkript hier einfügen…')}
               value={transcript}
-              onChange={(e) => setTranscript(e.target.value)}
+              onChange={(e) => {
+                setTranscript(e.target.value);
+                setConsentGiven(false);
+                setSubmissionStatus(null);
+                sessionIdRef.current = '';
+              }}
             />
             <div className="mt-2 flex items-center justify-between">
               <span className="text-[0.73rem] text-white/25">{charLabel}</span>
               <button
                 type="button"
                 className="rounded-full border border-white/10 px-3 py-1 text-[0.75rem] text-white/40 hover:text-white/70"
-                onClick={() => setTranscript('')}
+                onClick={() => {
+                  setTranscript('');
+                  setConsentGiven(false);
+                  setSubmissionStatus(null);
+                  sessionIdRef.current = '';
+                }}
               >
                 {L('Clear', 'Leeren')}
               </button>
@@ -252,8 +393,8 @@ export function AiStoryTool() {
             <h4 className="font-lora text-xl font-semibold text-white">{L('Configure the story', 'Story konfigurieren')}</h4>
             <p className="mb-6 mt-1 text-[0.84rem] text-white/45">
               {L(
-                'Choose story type and output shape (sample — not sent to a server).',
-                'Story-Typ und Ausgabeform wählen (Beispiel – wird nicht an einen Server gesendet).'
+                'Choose story type and output shape. Submission only happens after you confirm consent in the review step.',
+                'Story-Typ und Ausgabeform wählen. Eingereicht wird erst nach deiner Zustimmung im Prüfschritt.'
               )}
             </p>
             <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -453,6 +594,38 @@ export function AiStoryTool() {
               </div>
             )}
 
+            <div className="mt-6 rounded-[14px] border border-white/10 bg-white/[0.04] p-4">
+              <label className="flex cursor-pointer items-start gap-3 text-[0.82rem] leading-relaxed text-white/65 hover:text-white/80">
+                <input
+                  type="checkbox"
+                  checked={consentGiven}
+                  onChange={(event) => {
+                    setConsentGiven(event.target.checked);
+                    setSubmissionStatus(null);
+                  }}
+                  disabled={submissionStatus?.type === 'success'}
+                  className="mt-1 accent-[#9152FF]"
+                />
+                <span>
+                  {L(
+                    'I confirm that I have consent to submit this story transcript and generated story for human review by Building Bridges. I understand it will not be published automatically.',
+                    'Ich bestätige, dass ich die Zustimmung habe, dieses Story-Transkript und die generierte Story zur menschlichen Prüfung durch Building Bridges einzureichen. Mir ist bewusst, dass sie nicht automatisch veröffentlicht wird.'
+                  )}
+                </span>
+              </label>
+              {submissionStatus ? (
+                <p
+                  className={`mt-3 rounded-xl px-3 py-2 text-[0.8rem] font-semibold ${
+                    submissionStatus.type === 'success'
+                      ? 'bg-emerald-400/10 text-emerald-200 ring-1 ring-emerald-300/25'
+                      : 'bg-rose-400/10 text-rose-200 ring-1 ring-rose-300/25'
+                  }`}
+                >
+                  {submissionStatus.message}
+                </p>
+              ) : null}
+            </div>
+
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
               <div className="flex flex-wrap gap-2">
                 <button
@@ -472,14 +645,15 @@ export function AiStoryTool() {
               </div>
               <button
                 type="button"
-                onClick={() =>
-                  window.alert(
-                    L('Full page export coming with API integration!', 'Vollständiger Export folgt mit API-Anbindung!')
-                  )
-                }
-                className="rounded-full bg-gradient-to-br from-[#9152FF] to-[#7339E0] px-5 py-2.5 text-[0.84rem] font-semibold text-white"
+                onClick={handleSubmitForReview}
+                disabled={isSubmitting || submissionStatus?.type === 'success'}
+                className="rounded-full bg-gradient-to-br from-[#9152FF] to-[#7339E0] px-5 py-2.5 text-[0.84rem] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {L('Open full story ↗', 'Vollständige Story öffnen ↗')}
+                {isSubmitting
+                  ? L('Submitting…', 'Wird eingereicht…')
+                  : submissionStatus?.type === 'success'
+                    ? L('Submitted for review', 'Zur Prüfung eingereicht')
+                    : L('Submit for review', 'Zur Prüfung einreichen')}
               </button>
             </div>
           </div>

@@ -16,10 +16,11 @@ export default function ContactPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     setIsSubmitting(true);
     setFormStatus(null);
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     const payload = {
       firstName: String(formData.get('firstName') ?? ''),
       lastName: String(formData.get('lastName') ?? ''),
@@ -43,7 +44,7 @@ export default function ContactPage() {
         throw new Error(result.message || 'Failed to send message');
       }
 
-      event.currentTarget.reset();
+      form.reset();
       setFormStatus({
         type: 'success',
         message: isDe ? 'Danke, Ihre Nachricht wurde gesendet.' : 'Thank you, your message has been sent.',

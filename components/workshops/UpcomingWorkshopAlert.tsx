@@ -35,9 +35,9 @@ export function UpcomingWorkshopAlert({ className = '', href = '/workshops' }: U
     setOpen(false);
   };
 
-  if (!open) return null;
-
   const copy = getUpcomingWorkshopAlert(lang);
+
+  if (!open || !copy) return null;
 
   return (
     <div

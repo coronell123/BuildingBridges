@@ -2,6 +2,7 @@
 
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useLandingLocale } from '@/lib/landing/locale';
 import {
   getAllCommunityStories,
@@ -12,8 +13,12 @@ import {
 } from '@/lib/content/communityStories';
 import './community-stories.css';
 
-type StoryFormat = 'immersive' | 'card' | 'timeline' | 'quotes' | 'album';
+type StoryFormat = 'immersive' | 'card' | 'video' | 'timeline' | 'quotes' | 'globe' | 'album';
 type StoryFilter = 'all' | StoryType;
+
+const StoryGlobe = dynamic(() => import('./StoryGlobe').then((m) => m.StoryGlobe), {
+  ssr: false,
+});
 
 function TrustedHtml({ html, className }: { html: string; className?: string }) {
   return <span className={className} dangerouslySetInnerHTML={{ __html: html }} />;
@@ -110,6 +115,24 @@ export function CommunityStories() {
     if (format === 'album') setAlbumIndex(0);
   }, [format]);
 
+  useEffect(() => {
+    if (view !== 'viewer') return;
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setView('browser');
+      setSelectedId(null);
+      sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [view]);
+
   const scrollToStoryTool = () => {
     document.getElementById('ai-story-tool')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -138,9 +161,12 @@ export function CommunityStories() {
 
   const formats: { id: StoryFormat; icon: string; label: string }[] = [
     { id: 'immersive', icon: '📜', label: t('Immersive', 'Immersiv') },
-    { id: 'card', icon: '🃏', label: t('Story Card', 'Story-Karte') },
+    story?.videoSrc
+      ? { id: 'video', icon: '▶', label: t('Video', 'Video') }
+      : { id: 'card', icon: '🃏', label: t('Story Card', 'Story-Karte') },
     { id: 'timeline', icon: '📅', label: t('Timeline', 'Zeitleiste') },
     { id: 'quotes', icon: '💬', label: t('Quotes', 'Zitate') },
+    { id: 'globe', icon: '🌍', label: t('Globe', 'Globus') },
     { id: 'album', icon: '📖', label: t('Album', 'Album') },
   ];
 
@@ -271,49 +297,53 @@ export function CommunityStories() {
             </div>
           </>
         ) : story ? (
-          <>
-            <div className="viewer-topbar">
-              <button type="button" className="back-btn" onClick={closeViewer}>
-                ← {t('All stories', 'Alle Stories')}
-              </button>
-              <div>
-                <div className="viewer-story-title">{story.name}</div>
-                <div className="viewer-story-origin">
-                  {story.origin} · {story.field}
+          <div className="story-viewer-modal" role="dialog" aria-modal="true" aria-labelledby="story-viewer-title">
+            <div className="story-viewer-shell">
+              <div className="viewer-topbar">
+                <button type="button" className="back-btn" onClick={closeViewer}>
+                  ← {t('All stories', 'Alle Stories')}
+                </button>
+                <div>
+                  <div id="story-viewer-title" className="viewer-story-title">{story.name}</div>
+                  <div className="viewer-story-origin">
+                    {story.origin} · {story.field}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="format-switcher" role="tablist" aria-label={t('Story format', 'Story-Format')}>
-              {formats.map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={format === f.id}
-                  className={`fmt-btn ${format === f.id ? 'active' : ''}`}
-                  onClick={() => setFormat(f.id)}
-                >
-                  <span className="fb-icon" aria-hidden>
-                    {f.icon}
-                  </span>
-                  {f.label}
-                </button>
-              ))}
-            </div>
+              <div className="format-switcher" role="tablist" aria-label={t('Story format', 'Story-Format')}>
+                {formats.map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={format === f.id}
+                    className={`fmt-btn ${format === f.id ? 'active' : ''}`}
+                    onClick={() => setFormat(f.id)}
+                  >
+                    <span className="fb-icon" aria-hidden>
+                      {f.icon}
+                    </span>
+                    {f.label}
+                  </button>
+                ))}
+              </div>
 
-            <StoryViewerFormats
-              story={story}
-              format={format}
-              cardChapter={cardChapter}
-              setCardChapter={setCardChapter}
-              albumSlides={albumSlides}
-              albumIndex={albumIndex}
-              goAlbum={goAlbum}
-              touchStartX={touchStartX}
-              t={t}
-            />
-          </>
+              <div className="story-viewer-stage">
+                <StoryViewerFormats
+                  story={story}
+                  format={format}
+                  cardChapter={cardChapter}
+                  setCardChapter={setCardChapter}
+                  albumSlides={albumSlides}
+                  albumIndex={albumIndex}
+                  goAlbum={goAlbum}
+                  touchStartX={touchStartX}
+                  t={t}
+                />
+              </div>
+            </div>
+          </div>
         ) : null}
       </div>
     </section>
@@ -389,6 +419,16 @@ function StoryViewerFormats({
             ))}
           </div>
         </div>
+      </div>
+
+      <div className={`fmt-view ${format === 'video' ? 'active' : ''}`} id="fmt-video" hidden={format !== 'video'}>
+        {story.videoSrc ? (
+          <div className="story-video-panel">
+            <video className="story-video-player" controls playsInline preload="metadata" aria-label={story.name}>
+              <source src={story.videoSrc} type="video/mp4" />
+            </video>
+          </div>
+        ) : null}
       </div>
 
       <div className={`fmt-view ${format === 'card' ? 'active' : ''}`} id="fmt-card" hidden={format !== 'card'}>
@@ -507,6 +547,19 @@ function StoryViewerFormats({
         </div>
       </div>
 
+      <div className={`fmt-view ${format === 'globe' ? 'active' : ''}`} id="fmt-globe" hidden={format !== 'globe'}>
+        {format === 'globe' && story.id === 'cairo-to-charite' ? (
+          <iframe
+            className="cairo-globe-iframe"
+            src="/cairo-to-charite-globe.html"
+            title="From Cairo to Charité — 3D Globe"
+            allow="autoplay"
+          />
+        ) : format === 'globe' ? (
+          <StoryGlobe story={story} t={t} />
+        ) : null}
+      </div>
+
       <div
         className={`fmt-view ${format === 'album' ? 'active' : ''}`}
         id="fmt-album"
@@ -519,60 +572,58 @@ function StoryViewerFormats({
           if (Math.abs(diff) > 40) goAlbum(albumIndex + (diff > 0 ? 1 : -1));
         }}
       >
-        <div className="album-shell">
-          <div className="album-header">
-            <div className="album-mentor">
-              <div className="alb-avatar" style={{ background: story.avatarBg }}>
-                {story.avatar}
+        <div className="album-board-shell">
+          <div className="album-board">
+            <div className="album-board-intro">
+              <div className="album-board-kicker">📷 {t('Memory Album', 'Erinnerungsalbum')}</div>
+              <h3>
+                {t('Memories, ', 'Erinnerungen, ')}
+                <em>{t('stacked', 'gestapelt')}</em>
+              </h3>
+              <p>{t('Click any polaroid to read that memory in detail.', 'Klicke auf ein Polaroid, um diese Erinnerung genauer zu lesen.')}</p>
+            </div>
+            <div className="album-polaroids">
+              {albumSlides.map((sl, i) => {
+                const chapter = i > 0 && i <= story.chapters.length ? story.chapters[i - 1] : undefined;
+                const rotations = [-6, 4, -3, 7, -5, 3, -2, 5];
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    className={`album-polaroid ${i === albumIndex ? 'active' : ''}`}
+                    style={{ transform: `rotate(${rotations[i % rotations.length]}deg)` }}
+                    onClick={() => goAlbum(i)}
+                    aria-current={i === albumIndex}
+                  >
+                    <span className="album-photo" style={{ background: sl.bg }}>
+                      <span className="album-photo-wash" style={{ background: sl.deco }} />
+                      <span className="album-photo-icon">{chapter?.icon ?? story.avatar}</span>
+                    </span>
+                    <span className="album-caption">{chapter?.label ?? story.name}</span>
+                    <span className="album-stamp">{i === 0 ? t('Start', 'Start') : String(i).padStart(2, '0')}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <aside className="album-memory-note">
+              <div className="album-note-overline">{albumSlides[albumIndex]?.overline}</div>
+              <h4>
+                <TrustedHtml html={albumSlides[albumIndex]?.titleHtml ?? ''} />
+              </h4>
+              {albumSlides[albumIndex]?.body ? <p>{albumSlides[albumIndex]?.body}</p> : null}
+              {albumSlides[albumIndex]?.quote ? <blockquote>&ldquo;{albumSlides[albumIndex].quote}&rdquo;</blockquote> : null}
+              <div className="album-note-controls">
+                <button type="button" onClick={() => goAlbum(albumIndex - 1)} aria-label={t('Previous memory', 'Vorherige Erinnerung')}>
+                  ←
+                </button>
+                <span>
+                  {albumIndex + 1} / {albumSlides.length}
+                </span>
+                <button type="button" onClick={() => goAlbum(albumIndex + 1)} aria-label={t('Next memory', 'Nächste Erinnerung')}>
+                  →
+                </button>
               </div>
-              <div>
-                <div className="alb-name">{story.name}</div>
-                <div className="alb-role">
-                  {story.field} · {story.origin}
-                </div>
-              </div>
-            </div>
-            <div className="album-nav">
-              <button type="button" className="alb-nav-btn" aria-label={t('Previous slide', 'Vorherige Folie')} onClick={() => goAlbum(albumIndex - 1)}>
-                ←
-              </button>
-              <span className="alb-counter">
-                {albumIndex + 1} / {albumSlides.length}
-              </span>
-              <button type="button" className="alb-nav-btn" aria-label={t('Next slide', 'Nächste Folie')} onClick={() => goAlbum(albumIndex + 1)}>
-                →
-              </button>
-            </div>
-          </div>
-          <div className="album-stage">
-            <div className="album-slides" style={{ transform: `translateX(-${albumIndex * 100}%)` }}>
-              {albumSlides.map((sl, i) => (
-                <div key={i} className="alb-slide">
-                  <div className="alb-slide-bg" style={{ background: sl.bg }} />
-                  <div className="alb-deco" style={{ background: sl.deco }} />
-                  <div className="alb-slide-content">
-                    <div className="alb-slide-overline">{sl.overline}</div>
-                    <div className="alb-slide-title">
-                      <TrustedHtml html={sl.titleHtml} />
-                    </div>
-                    {sl.body ? <div className="alb-slide-body">{sl.body}</div> : null}
-                    {sl.quote ? <div className="alb-slide-quote">&ldquo;{sl.quote}&rdquo;</div> : null}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="alb-dots">
-            {albumSlides.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                className={`alb-dot ${i === albumIndex ? 'active' : ''}`}
-                aria-label={t(`Go to slide ${i + 1}`, `Zu Folie ${i + 1}`)}
-                aria-current={i === albumIndex}
-                onClick={() => goAlbum(i)}
-              />
-            ))}
+            </aside>
           </div>
         </div>
       </div>

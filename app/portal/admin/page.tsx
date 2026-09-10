@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { AdminPortalHome } from '@/components/dashboard-portal/AdminPortalHome';
+import { getPendingStoriesForReview } from '@/lib/actions/stories';
 import { getUserOrPreviewForPortalAdmin } from '@/lib/dev/dashboard-preview-resolve';
 
 export default async function AdminPortalHomePage() {
@@ -10,5 +11,7 @@ export default async function AdminPortalHomePage() {
     (user.name?.trim() && user.name.trim().split(/\s+/)[0]) ||
     (user.email?.includes('@') ? user.email!.split('@')[0] : 'Amina');
 
-  return <AdminPortalHome greetingName={greetingName} />;
+  const storyRows = await getPendingStoriesForReview();
+
+  return <AdminPortalHome greetingName={greetingName} storyRows={storyRows} />;
 }

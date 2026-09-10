@@ -23,9 +23,10 @@ import {
 } from '@/lib/db/schema';
 import { comparePasswords, hashPassword } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { createCheckoutSession } from '@/lib/payments/stripe';
 import { getUser, getUserWithTeam } from '@/lib/db/queries';
+import { sendPasswordResetEmail } from '@/lib/email/password-reset';
 import {
   validatedAction,
   validatedActionWithUser,
@@ -47,6 +48,22 @@ async function logActivity(
     ipAddress: ipAddress || '',
   };
   await db.insert(activityLogs).values(newActivity);
+}
+
+function getPasswordResetBaseUrl() {
+  const configuredUrl = process.env.NEXTAUTH_URL || process.env.SITE_URL;
+  if (configuredUrl?.trim()) {
+    return configuredUrl.trim().replace(/\/$/, '');
+  }
+
+  const headerList = headers();
+  const host = headerList.get('host');
+  if (!host) {
+    return 'http://localhost:3000';
+  }
+
+  const protocol = headerList.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https');
+  return `${protocol}://${host}`;
 }
 
 // Sign-in is handled by NextAuth credentials provider in lib/auth.ts
@@ -472,7 +489,7 @@ export async function resetPassword(formData: FormData) {
 
       // Always return the same message for security (don't reveal if email exists)
       if (existingUser.length === 0) {
-        console.log(`Password reset requested for non-existent email: ${email}`);
+        console.info('Password reset requested for an email address with no active account.');
         return {
           error: '',
           success: 'Falls ein Konto mit dieser E-Mail-Adresse existiert, erhalten Sie einen Link zum Zurücksetzen des Passworts.'
@@ -490,11 +507,41 @@ export async function resetPassword(formData: FormData) {
         expires: expiresAt,
       });
 
-      // TODO: Send email with reset link
-      // await sendPasswordResetEmail(email, resetToken);
-      // For now, just log the token (in production, this should be sent via email)
-      console.log(`Password reset token for ${email}: ${resetToken}`);
-      console.log(`Reset link: ${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`);
+      const resetUrl = `${getPasswordResetBaseUrl()}/reset-password?token=${encodeURIComponent(resetToken)}`;
+
+      try {
+        await sendPasswordResetEmail({ to: email, resetUrl });
+      } catch (error) {
+        await db
+          .delete(verificationTokens)
+          .where(eq(verificationTokens.token, resetToken));
+
+        const mailError = error as {
+          name?: unknown;
+          code?: unknown;
+          responseCode?: unknown;
+          command?: unknown;
+          message?: unknown;
+          errno?: unknown;
+          syscall?: unknown;
+          address?: unknown;
+          port?: unknown;
+        };
+
+        const safeMailError = {
+          name: typeof mailError.name === 'string' ? mailError.name : undefined,
+          code: typeof mailError.code === 'string' ? mailError.code : undefined,
+          responseCode: typeof mailError.responseCode === 'number' ? mailError.responseCode : undefined,
+          command: typeof mailError.command === 'string' ? mailError.command : undefined,
+          message: typeof mailError.message === 'string' ? mailError.message : undefined,
+          errno: typeof mailError.errno === 'number' || typeof mailError.errno === 'string' ? mailError.errno : undefined,
+          syscall: typeof mailError.syscall === 'string' ? mailError.syscall : undefined,
+          address: typeof mailError.address === 'string' ? mailError.address : undefined,
+          port: typeof mailError.port === 'number' ? mailError.port : undefined,
+        };
+
+        console.error(`Password reset email could not be sent. SMTP diagnostic: ${JSON.stringify(safeMailError)}`);
+      }
 
       return {
         error: '',
@@ -569,7 +616,7 @@ export async function resetPassword(formData: FormData) {
         .delete(verificationTokens)
         .where(eq(verificationTokens.token, token));
 
-      console.log(`Password reset successful for email: ${verificationToken.identifier}`);
+      console.info('Password reset completed successfully.');
 
       return {
         error: '',

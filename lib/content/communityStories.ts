@@ -36,6 +36,7 @@ export type CommunityStoryData = {
   timelineDesc: string;
   chapters: StoryChapter[];
   quoteColors: QuoteColorSpec[];
+  videoSrc?: string;
 };
 
 const QUOTE_COLORS: QuoteColorSpec[] = [
@@ -61,6 +62,7 @@ const CAIRO_EN: CommunityStoryData = {
     "A psychology student's journey across continents, classrooms and belonging — navigating barriers with quiet determination.",
   tags: ['Psychology', 'Mentor', 'Egypt → Germany'],
   tagStyles: ['', 'sage', 'amber'],
+  videoSrc: '/videos/cairo-to-charite.mp4',
   cardText:
     'Growing up in a German school in Egypt, she dreamed of studying psychology in Berlin. When a university representative told her she would never be admitted, she applied anyway — and was. She arrived late, without housing, without a credit history. She navigated lecture halls where she was one of very few students of colour. She carried the accumulated weight of small comments and large systems. And she discovered, slowly, that her bilingual background was not a burden but a gift the field desperately needed.',
   keyQuote: '"Don\'t rush to prove anything to others — do it for yourself."',
@@ -854,4 +856,56 @@ export function getCommunityStoryById(locale: LandingLocale, id: string): Commun
 
 export function stripHtml(html: string): string {
   return html.replace(/<[^>]+>/g, '');
+}
+
+export type GlobeStop = {
+  lat: number;
+  lng: number;
+  color: number;
+};
+
+const GLOBE_COLORS = [0x6baa8a, 0xb580ff, 0x9152ff, 0x6baa8a, 0xb580ff, 0x6baa8a];
+
+const GLOBE_COORDS: Record<string, { lat: number; lng: number }[]> = {
+  'cairo-to-charite': [
+    { lat: 30.04, lng: 31.24 },
+    { lat: 52.455, lng: 13.295 },
+    { lat: 52.52, lng: 13.405 },
+    { lat: 52.448, lng: 13.29 },
+    { lat: 52.526, lng: 13.378 },
+    { lat: 52.51, lng: 13.41 },
+  ],
+  'finding-my-people-berlin': [
+    { lat: 52.52, lng: 13.405 },
+    { lat: 52.49, lng: 13.39 },
+    { lat: 52.448, lng: 13.29 },
+    { lat: 52.51, lng: 13.38 },
+    { lat: 52.53, lng: 13.42 },
+    { lat: 52.52, lng: 13.41 },
+  ],
+  'mentee-one-school-strength': [
+    { lat: 52.52, lng: 13.405 },
+    { lat: 52.51, lng: 13.39 },
+    { lat: 52.53, lng: 13.38 },
+    { lat: 52.49, lng: 13.42 },
+    { lat: 52.47, lng: 13.35 },
+    { lat: 52.52, lng: 13.41 },
+  ],
+  'black-therapists-fund': [
+    { lat: 52.52, lng: 13.405 },
+    { lat: 50.11, lng: 8.68 },
+    { lat: 48.14, lng: 11.58 },
+    { lat: 53.55, lng: 9.99 },
+    { lat: 52.52, lng: 13.38 },
+    { lat: 52.51, lng: 13.41 },
+  ],
+};
+
+export function getGlobeStops(storyId: string, chapterCount: number): GlobeStop[] {
+  const coords = GLOBE_COORDS[storyId];
+  return Array.from({ length: chapterCount }, (_, i) => ({
+    lat: coords?.[i]?.lat ?? 52.52 + (i - 2) * 0.03,
+    lng: coords?.[i]?.lng ?? 13.4 + (i - 2) * 0.025,
+    color: GLOBE_COLORS[i % GLOBE_COLORS.length],
+  }));
 }

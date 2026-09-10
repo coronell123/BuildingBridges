@@ -12,35 +12,27 @@ export const dbConfig = {
    * Follows a priority order of environment variables
    */
   getConnectionString(): string {
-    // Development, test, or production?
-    const environment = process.env.NODE_ENV || 'development';
-    const isCloud = process.env.USE_CLOUD_DB === 'true';
-    
     // Local database connection string (for local development)
     const localDbUrl = 'postgresql://postgres:postgres@localhost:5432/building_bridges_dev';
-    
-    // Return the appropriate connection string based on environment and configuration
-    if (environment === 'development' && !isCloud) {
-      // Local development - use local PostgreSQL
-      return process.env.LOCAL_DATABASE_URL || localDbUrl;
-    } else {
-      // Cloud database in any environment, prioritize DATABASE_URL, then POSTGRES_URL
-      const rawUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
-      if (rawUrl) {
-        // Ensure SSL is enforced for remote databases (e.g., Neon)
-        try {
-          const url = new URL(rawUrl);
-          // Append sslmode=require if not already present
-          const hasSslMode = url.searchParams.has('sslmode');
-          if (!hasSslMode) {
-            url.searchParams.set('sslmode', 'require');
-          }
-          return url.toString();
-        } catch {
-          // If URL parsing fails, fall back to raw value
-          return rawUrl;
+
+    // Explicit environment URLs should always win, including during local dev.
+    const rawUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+    if (rawUrl) {
+      try {
+        const url = new URL(rawUrl);
+        const isLocalHost = ['localhost', '127.0.0.1', '::1'].includes(url.hostname);
+        if (!isLocalHost && !url.searchParams.has('sslmode')) {
+          url.searchParams.set('sslmode', 'require');
         }
+        return url.toString();
+      } catch {
+        // If URL parsing fails, fall back to raw value
+        return rawUrl;
       }
+    }
+
+    if (process.env.LOCAL_DATABASE_URL) {
+      return process.env.LOCAL_DATABASE_URL;
     }
     
     // If no valid connection string is found, fall back to local development
@@ -52,16 +44,23 @@ export const dbConfig = {
    * Get connection options for postgres client
    */
   getConnectionOptions() {
-    // Enable SSL for non-local (cloud) connections
-    const environment = process.env.NODE_ENV || 'development';
-    const isCloud = process.env.USE_CLOUD_DB === 'true' || environment !== 'development';
+    const connectionString = this.getConnectionString();
+    let isRemoteDatabase = process.env.USE_CLOUD_DB === 'true';
+
+    try {
+      const url = new URL(connectionString);
+      isRemoteDatabase = !['localhost', '127.0.0.1', '::1'].includes(url.hostname);
+    } catch {
+      isRemoteDatabase = process.env.NODE_ENV !== 'development';
+    }
+
     return {
       max: process.env.DB_POOL_SIZE ? parseInt(process.env.DB_POOL_SIZE, 10) : 10,
       prepare: true, // Enables prepared statements for better security
       idle_timeout: process.env.DB_IDLE_TIMEOUT ? parseInt(process.env.DB_IDLE_TIMEOUT, 10) : 30, // seconds
       connect_timeout: process.env.DB_CONNECT_TIMEOUT ? parseInt(process.env.DB_CONNECT_TIMEOUT, 10) : 30, // seconds
       // postgres.js accepts ssl: 'require' to enforce TLS
-      ...(isCloud ? { ssl: 'require' as const } : {}),
+      ...(isRemoteDatabase ? { ssl: 'require' as const } : {}),
     };
   },
   

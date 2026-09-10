@@ -36,9 +36,17 @@ export default function WorkshopsPage() {
 
         <UpcomingWorkshopAlert className="mb-8" />
 
-        <WorkshopHero workshop={featuredWorkshop} />
+        {featuredWorkshop ? <WorkshopHero workshop={featuredWorkshop} /> : null}
 
-        <WorkshopGrid items={workshopFeed} labels={{ eyebrow: labels.feedEyebrow, title: labels.feedTitle }} />
+        <WorkshopGrid
+          items={workshopFeed}
+          labels={{
+            eyebrow: labels.feedEyebrow,
+            title: labels.feedTitle,
+            emptyTitle: labels.feedEmptyTitle,
+            emptyBody: labels.feedEmptyBody,
+          }}
+        />
 
         <section className="mt-14">
           <div className="mb-5 flex items-end justify-between gap-3">

@@ -3,27 +3,19 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { UpcomingWorkshopAlert } from '@/components/workshops/UpcomingWorkshopAlert';
+import { getFeaturedWorkshop } from '@/components/workshops/workshop-data';
 import { useLanguage } from '@/lib/hooks/useLanguage';
 
 type LocalizedText = { en: string; de: string };
 
-const featuredNextUp = {
-  eyebrow: { en: 'Next up', de: 'Als Nächstes' },
-  title: {
-    en: 'Online workshop: Evaluating storytelling formats with mentors',
-    de: 'Online-Workshop: Storytelling-Formate mit Mentor:innen evaluieren',
-  },
-  meta: {
-    en: 'Friday, July 31, 2026 · Time TBD · 90 minutes · Zoom + Miro',
-    de: 'Freitag, 31.07.2026 · Uhrzeit folgt · 90 Minuten · Zoom + Miro',
-  },
-  description: {
-    en: 'Help shape the Building Bridges storytelling platform — explore prototypes, share feedback, and co-create ideas for an accessible digital space.',
-    de: 'Gestalte die Building-Bridges-Storytelling-Plattform mit — erkunde Prototypen, teile Feedback und entwickle Ideen für einen zugänglichen digitalen Raum.',
-  },
-};
-
 const pastWorkshops: { date: LocalizedText; title: LocalizedText }[] = [
+  {
+    date: { en: 'Friday, July 31, 2026 · Time TBD · 90 minutes · Zoom + Miro', de: 'Freitag, 31.07.2026 · Uhrzeit folgt · 90 Minuten · Zoom + Miro' },
+    title: {
+      en: 'Online workshop: Evaluating storytelling formats with mentors',
+      de: 'Online-Workshop: Storytelling-Formate mit Mentor:innen evaluieren',
+    },
+  },
   {
     date: { en: 'Thursday, December 18, 2025', de: 'Donnerstag, 18.12.2025' },
     title: { en: 'Perlen & Power – Johanna-Eck', de: 'Perlen & Power – Johanna-Eck' },
@@ -47,8 +39,9 @@ function pick<T extends LocalizedText>(item: T, isDe: boolean): string {
 }
 
 export function LandingEvents() {
-  const { isDe } = useLanguage();
+  const { isDe, lang } = useLanguage();
   const [showPast, setShowPast] = useState(false);
+  const featured = getFeaturedWorkshop(lang);
 
   return (
     <section id="events" className="bg-white px-6 py-24 sm:px-10 sm:py-28">
@@ -81,24 +74,45 @@ export function LandingEvents() {
             </Link>
           </div>
 
-          <div className="relative rounded-[24px] bg-[#9152FF] p-8 text-white shadow-[0_12px_48px_rgba(145,82,255,0.18)]">
-            <span className="absolute -right-2 -top-2 inline-flex items-center gap-1 rounded-full border-2 border-white bg-[#6BAA8A] px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white shadow-md">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/80 opacity-75" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+          {featured ? (
+            <div className="relative rounded-[24px] bg-[#9152FF] p-8 text-white shadow-[0_12px_48px_rgba(145,82,255,0.18)]">
+              <span className="absolute -right-2 -top-2 inline-flex items-center gap-1 rounded-full border-2 border-white bg-[#6BAA8A] px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white shadow-md">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/80 opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+                </span>
+                {isDe ? 'Aktuell' : 'Updated'}
               </span>
-              {isDe ? 'Aktuell' : 'Updated'}
-            </span>
-            <p className="mb-2 text-[0.72rem] font-bold uppercase tracking-[0.12em] text-white/65">
-              {pick(featuredNextUp.eyebrow, isDe)}
-            </p>
-            <h3 className="font-lora text-xl font-bold">{pick(featuredNextUp.title, isDe)}</h3>
-            <p className="mt-1 text-[0.84rem] opacity-72">{pick(featuredNextUp.meta, isDe)}</p>
-            <p className="mt-3 text-[0.88rem] leading-relaxed opacity-80">{pick(featuredNextUp.description, isDe)}</p>
-            <Link href="/workshops" className="mt-4 inline-block text-[0.84rem] font-bold text-[#EDE5FF] hover:underline">
-              {isDe ? 'Mehr erfahren →' : 'Read more →'}
-            </Link>
-          </div>
+              <p className="mb-2 text-[0.72rem] font-bold uppercase tracking-[0.12em] text-white/65">
+                {isDe ? 'Als Nächstes' : 'Next up'}
+              </p>
+              <h3 className="font-lora text-xl font-bold">{featured.title}</h3>
+              <p className="mt-1 text-[0.84rem] opacity-72">
+                {featured.date} · {featured.time} · {featured.location}
+              </p>
+              <p className="mt-3 text-[0.88rem] leading-relaxed opacity-80">{featured.description}</p>
+              <Link href="/workshops" className="mt-4 inline-block text-[0.84rem] font-bold text-[#EDE5FF] hover:underline">
+                {isDe ? 'Mehr erfahren →' : 'Read more →'}
+              </Link>
+            </div>
+          ) : (
+            <div className="rounded-[24px] border-[1.5px] border-[rgba(145,82,255,0.18)] bg-[#F5F0FF] p-8">
+              <p className="mb-2 text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#9152FF]">
+                {isDe ? 'Als Nächstes' : 'Next up'}
+              </p>
+              <h3 className="font-lora text-xl font-bold text-[#1A1033]">
+                {isDe ? 'Zurzeit keine kommenden Workshops' : 'No upcoming workshops'}
+              </h3>
+              <p className="mt-3 text-[0.88rem] leading-relaxed text-[#6B5F8A]">
+                {isDe
+                  ? 'Neue Termine werden hier bekannt gegeben. Vergangene Workshops findest du im Archiv.'
+                  : 'New dates will be announced here. You can browse past workshops in the archive.'}
+              </p>
+              <Link href="/workshops" className="mt-4 inline-block text-sm font-bold text-[#9152FF] hover:underline">
+                {isDe ? 'Archiv ansehen →' : 'View archive →'}
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-center">

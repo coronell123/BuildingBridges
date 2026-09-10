@@ -1,11 +1,16 @@
 'use client';
 
+import { useFormState, useFormStatus } from 'react-dom';
+import { reviewStoryAction } from '@/lib/actions/stories';
 import { cn } from '@/lib/utils';
 
 export type StoryReviewRow = {
-  id: string;
+  id: number;
+  sessionId: string;
   title: string;
-  submittedBy: string;
+  summary: string;
+  consentGiven: boolean;
+  status: string;
   submittedOn: string;
 };
 
@@ -20,6 +25,8 @@ export function StoryReviewTable({
   title = 'Stories for review',
   className,
 }: StoryReviewTableProps) {
+  const [state, formAction] = useFormState(reviewStoryAction, { type: null, message: '' });
+
   return (
     <div
       className={cn(
@@ -29,52 +36,111 @@ export function StoryReviewTable({
     >
       <div className="border-b border-[rgba(145,82,255,0.1)] px-5 py-4">
         <h3 className="font-lora text-lg font-semibold text-[#1A1033]">{title}</h3>
+        {state.message ? (
+          <p
+            className={cn(
+              'mt-2 rounded-xl px-3 py-2 text-[0.8rem] font-medium',
+              state.type === 'success'
+                ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/80'
+                : 'bg-rose-50 text-rose-700 ring-1 ring-rose-200/80'
+            )}
+          >
+            {state.message}
+          </p>
+        ) : null}
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse text-left text-[0.88rem]">
           <thead>
             <tr className="bg-[#FAF8FF] text-[0.72rem] font-bold uppercase tracking-wider text-[#9A8CB3]">
               <th className="whitespace-nowrap px-5 py-3 font-bold">Story Title</th>
-              <th className="whitespace-nowrap px-5 py-3 font-bold">Submitted By</th>
+              <th className="whitespace-nowrap px-5 py-3 font-bold">Summary</th>
+              <th className="whitespace-nowrap px-5 py-3 font-bold">Consent</th>
+              <th className="whitespace-nowrap px-5 py-3 font-bold">Status</th>
               <th className="whitespace-nowrap px-5 py-3 font-bold">Submitted On</th>
               <th className="whitespace-nowrap px-5 py-3 font-bold text-right">Action</th>
             </tr>
           </thead>
           <tbody className="text-[#1A1033]">
-            {rows.map((row) => (
-              <tr key={row.id} className="border-t border-[rgba(145,82,255,0.08)]">
-                <td className="px-5 py-3 font-semibold">{row.title}</td>
-                <td className="px-5 py-3 text-[#5C5275]">{row.submittedBy}</td>
-                <td className="px-5 py-3 text-[#5C5275]">{row.submittedOn}</td>
-                <td className="px-5 py-3 text-right">
-                  <div className="flex flex-wrap justify-end gap-2">
-                    <button
-                      type="button"
-                      className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-3 py-1.5 text-[0.75rem] font-semibold text-white shadow-sm transition hover:brightness-105"
-                      onClick={() => {
-                        // TODO: PATCH /api/stories/{id} — set status: 'published'
-                        console.info('approve story', row.id);
-                      }}
-                    >
-                      Approve
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded-full bg-rose-50 px-3 py-1.5 text-[0.75rem] font-semibold text-rose-700 ring-1 ring-rose-200/80 transition hover:bg-rose-100"
-                      onClick={() => {
-                        // TODO: PATCH /api/stories/{id} — set status: 'rejected'
-                        console.info('reject story', row.id);
-                      }}
-                    >
-                      Reject
-                    </button>
-                  </div>
+            {rows.length === 0 ? (
+              <tr className="border-t border-[rgba(145,82,255,0.08)]">
+                <td colSpan={6} className="px-5 py-6 text-center text-[#5C5275]">
+                  No stories are currently pending review.
                 </td>
               </tr>
-            ))}
+            ) : (
+              rows.map((row) => (
+                <tr key={row.id} className="border-t border-[rgba(145,82,255,0.08)] align-top">
+                  <td className="px-5 py-3">
+                    <div className="font-semibold">{row.title}</div>
+                    <div className="mt-1 text-[0.72rem] text-[#9A8CB3]">Session: {row.sessionId}</div>
+                  </td>
+                  <td className="max-w-[320px] px-5 py-3 text-[#5C5275]">{row.summary}</td>
+                  <td className="px-5 py-3">
+                    <span
+                      className={cn(
+                        'rounded-full px-2.5 py-1 text-[0.72rem] font-semibold',
+                        row.consentGiven
+                          ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/80'
+                          : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/80'
+                      )}
+                    >
+                      {row.consentGiven ? 'Given' : 'Missing'}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3">
+                    <span className="rounded-full bg-[#FAF8FF] px-2.5 py-1 text-[0.72rem] font-semibold text-[#7339E0] ring-1 ring-[rgba(145,82,255,0.16)]">
+                      {row.status}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3 text-[#5C5275]">{row.submittedOn}</td>
+                  <td className="px-5 py-3 text-right">
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <form action={formAction}>
+                        <input type="hidden" name="storyId" value={row.id} />
+                        <input type="hidden" name="decision" value="approve" />
+                        <ReviewButton variant="approve" label="Approve" pendingLabel="Approving..." />
+                      </form>
+                      <form action={formAction}>
+                        <input type="hidden" name="storyId" value={row.id} />
+                        <input type="hidden" name="decision" value="reject" />
+                        <ReviewButton variant="reject" label="Reject" pendingLabel="Rejecting..." />
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
     </div>
+  );
+}
+
+function ReviewButton({
+  variant,
+  label,
+  pendingLabel,
+}: {
+  variant: 'approve' | 'reject';
+  label: string;
+  pendingLabel: string;
+}) {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className={cn(
+        'rounded-full px-3 py-1.5 text-[0.75rem] font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60',
+        variant === 'approve'
+          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:brightness-105'
+          : 'bg-rose-50 text-rose-700 ring-1 ring-rose-200/80 hover:bg-rose-100'
+      )}
+    >
+      {pending ? pendingLabel : label}
+    </button>
   );
 }
